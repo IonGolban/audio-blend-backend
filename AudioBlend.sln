@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{6601D5B5-2DB7-44B6-A07C-BE1731958F19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBlend.API", "AudioBlend.API\AudioBlend.API.csproj", "{6C3E2D29-CA6D-4EAB-ADD9-536C65BE0AE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBlend.Core.MusicData", "AudioBlend.Core.MusicData\AudioBlend.Core.MusicData.csproj", "{48AF2012-A60A-48C6-8131-05A86B32CB2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBlend.Core.Streaming", "AudioBlend.Core.Streaming\AudioBlend.Core.Streaming.csproj", "{F3AE854B-DB85-4F6B-BD05-CBA92187F03D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBlend.Core.UserAccess", "AudioBlend.Core.UserAccess\AudioBlend.Core.UserAccess.csproj", "{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBlend.Core.Shared", "AudioBlend.Core.Shared\AudioBlend.Core.Shared.csproj", "{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C3E2D29-CA6D-4EAB-ADD9-536C65BE0AE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C3E2D29-CA6D-4EAB-ADD9-536C65BE0AE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C3E2D29-CA6D-4EAB-ADD9-536C65BE0AE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C3E2D29-CA6D-4EAB-ADD9-536C65BE0AE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48AF2012-A60A-48C6-8131-05A86B32CB2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48AF2012-A60A-48C6-8131-05A86B32CB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48AF2012-A60A-48C6-8131-05A86B32CB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48AF2012-A60A-48C6-8131-05A86B32CB2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3AE854B-DB85-4F6B-BD05-CBA92187F03D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3AE854B-DB85-4F6B-BD05-CBA92187F03D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3AE854B-DB85-4F6B-BD05-CBA92187F03D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3AE854B-DB85-4F6B-BD05-CBA92187F03D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{48AF2012-A60A-48C6-8131-05A86B32CB2B} = {6601D5B5-2DB7-44B6-A07C-BE1731958F19}
+		{F3AE854B-DB85-4F6B-BD05-CBA92187F03D} = {6601D5B5-2DB7-44B6-A07C-BE1731958F19}
+		{0581B2F3-B6E3-4AFC-95C9-B5B3B9BF6ECB} = {6601D5B5-2DB7-44B6-A07C-BE1731958F19}
+		{448C3F5A-F877-4F1F-9B9F-71F6A9D41A92} = {6601D5B5-2DB7-44B6-A07C-BE1731958F19}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {610025F2-F8E1-4FBD-881B-577E648042B9}
+	EndGlobalSection
+EndGlobal
