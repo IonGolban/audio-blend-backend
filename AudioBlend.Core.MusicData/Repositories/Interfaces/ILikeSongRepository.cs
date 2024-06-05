@@ -11,8 +11,5 @@ namespace AudioBlend.Core.MusicData.Repositories.Interfaces
 
         Task<Result<List<LikeSong>>> GetTopSongs(int count);
         Task<Result<List<LikeSong>>> GetLikedByUser(string userId);
-
-
-
     }
 }

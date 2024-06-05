@@ -1,4 +1,6 @@
-﻿namespace AudioBlend.Core.MusicData.Domain.Artists
+﻿using AudioBlend.Core.MusicData.Models.Likes;
+
+namespace AudioBlend.Core.MusicData.Domain.Artists
 {
     public class Artist
     {
@@ -7,6 +9,7 @@
         public string ImgUrl { get; private set; }
         public List<string> Genres { get; private set; }
         public int Followers { get; set; }
+        public ICollection<FollowArtist>? FollowedByUsers { get; set; }
         public string UserId { get; private set; } = string.Empty;
 
         public Artist()

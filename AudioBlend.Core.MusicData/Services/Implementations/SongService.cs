@@ -1,13 +1,19 @@
-﻿using AudioBlend.Core.MusicData.Domain.Songs;
+﻿using AudioBlend.Core.MusicData.Domain.Artists;
+using AudioBlend.Core.MusicData.Domain.Songs;
 using AudioBlend.Core.MusicData.Mappers;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.Shared.Responses;
+using Microsoft.AspNetCore.Identity;
 
 namespace AudioBlend.Core.MusicData.Services.Implementations
 {
-    public class SongService(IRecommendationService recommendationService,IPlaylistRepository playlistRepository ,ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository, ILikeSongRepository likeSongRepository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, ICurrentUserService currentUserService) : ISongService
+    public class SongService(IRecommendationService recommendationService, IPlaylistRepository playlistRepository,
+                             ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository,
+                             ILikeSongRepository likeSongRepository, ISongRepository songRepository,
+                             IArtistRepository artistRepository, IAlbumRepository albumRepository,
+                             ICurrentUserService currentUserService, UserManager<IdentityUser> userManager) : ISongService
     {
         private readonly ILikeSongRepository _likeSongRepositry = likeSongRepository;
         private readonly ILikeAlbumRepository _likeAlbumRepository = likeAlbumRepository;
@@ -18,7 +24,48 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         private readonly ICurrentUserService _currentUserService = currentUserService;
         private readonly IPlaylistRepository _playlistRepository = playlistRepository;
         private readonly IRecommendationService recommendationService = recommendationService;
+        private readonly UserManager<IdentityUser> _userManager = userManager;
+        public async Task<Response<List<SongQueryDto>>> GetLikedSongs(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return new Response<List<SongQueryDto>>()
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+            
+            var likes = await _likeSongRepositry.GetLikedByUser(userId);
 
+            if (!likes.IsSuccess)
+            {
+                return new Response<List<SongQueryDto>>()
+                {
+                    Success = true,
+                    Message = likes.ErrorMsg
+                };
+            }
+
+
+
+            var songs = new List<Song>();
+            foreach (var like in likes.Value)
+            {
+                var song = await _songRepository.GetByIdAsync(like.SongId);
+               
+                if (song.IsSuccess)
+                {
+                    songs.Add(song.Value);
+                }
+            }
+            return new Response<List<SongQueryDto>>()
+            {
+                Success = true,
+                Data = songs.Select(s => SongMapper.MapToSongQueryDto(s, s.Artist)).ToList()
+            };
+        }
         public async Task<Response<List<SongQueryDto>>> GetTopSongs(int count)
         {
             var resultLiked = await _likeSongRepositry.GetTopSongs(count);
@@ -30,7 +77,8 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 var song = await _songRepository.GetByIdAsync(likeSong.SongId);
                 if (song.IsSuccess)
                 {
-                    if(!songs.Any((s) =>  s.Id == song.Value.Id)){
+                    if (!songs.Any((s) => s.Id == song.Value.Id))
+                    {
 
                         songs.Add(song.Value);
                     }
@@ -39,7 +87,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             List<SongQueryDto> songsQuery = new List<SongQueryDto>();
 
-            foreach(var song in songs)
+            foreach (var song in songs)
             {
                 var aritst = await _artistRepository.GetByIdAsync(song.ArtistId);
                 var album = await _albumRepository.GetByIdAsync(song.AlbumId);
@@ -49,11 +97,30 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 }
 
                 songsQuery.Add(
-                    SongMapper.MapToSongQueryDto(song, aritst.Value)                );
+                    SongMapper.MapToSongQueryDto(song, aritst.Value));
             }
             return new Response<List<SongQueryDto>>()
             {
                 Data = songsQuery,
+                Success = true
+            };
+        }
+
+
+        public async Task<Response<List<SongQueryDto>>> GetByArtistId(Guid id)
+        {
+            var result = await _songRepository.GetByArtistId(id);
+            if (!result.IsSuccess)
+            {
+                return new Response<List<SongQueryDto>>()
+                {
+                    Success = false,
+                    Message = result.ErrorMsg
+                };
+            }
+            return new Response<List<SongQueryDto>>()
+            {
+                Data = result.Value.Select(s => SongMapper.MapToSongQueryDto(s, s.Artist)).ToList(),
                 Success = true
             };
         }
@@ -81,7 +148,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     continue;
                 }
 
-                listSongsDto.Add(SongMapper.MapToSongQueryDto(song,song.Artist));
+                listSongsDto.Add(SongMapper.MapToSongQueryDto(song, song.Artist));
             }
 
             return new Response<List<SongQueryDto>>()
@@ -96,20 +163,20 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         public async Task<Response<List<SongQueryDto>>> GetRecommendations(int count)
         {
             var userId = _currentUserService.GetUserId;
- 
+
             var topGenres = await recommendationService.GetRecommendationGenres(userId, 3);
 
             var recommendedSongs = new List<Song>();
             foreach (var genre in topGenres)
             {
-                var result = await _songRepository.GetByGenre(genre,10);
+                var result = await _songRepository.GetByGenre(genre, 10);
                 if (result.IsSuccess)
                 {
                     recommendedSongs.AddRange(result.Value);
                 }
             }
 
-            
+
 
             var recommendations = new List<SongQueryDto>();
             foreach (var song in recommendedSongs)
@@ -143,12 +210,13 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        public async Task<Response<List<SongQueryDto>>> GetByGenre(string genre,int count)
+        public async Task<Response<List<SongQueryDto>>> GetByGenre(string genre, int count)
         {
             var result = await _songRepository.GetByGenre(genre, count);
             if (!result.IsSuccess)
             {
-                return new Response<List<SongQueryDto>>() { 
+                return new Response<List<SongQueryDto>>()
+                {
                     Success = false,
                     Message = result.ErrorMsg
                 };
@@ -168,7 +236,8 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 listSongsDto.Add(SongMapper.MapToSongQueryDto(song, song.Artist));
             }
 
-            return new Response<List<SongQueryDto>>() {
+            return new Response<List<SongQueryDto>>()
+            {
                 Success = true,
                 Data = listSongsDto
             };
@@ -209,13 +278,12 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 listSongsDto.Add(SongMapper.MapToSongQueryDto(song, song.Artist));
             }
 
-            return new Response<List<SongQueryDto>>() { 
+            return new Response<List<SongQueryDto>>()
+            {
                 Success = true,
                 Data = listSongsDto
             };
         }
-
-
 
     }
 }

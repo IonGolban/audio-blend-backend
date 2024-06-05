@@ -75,5 +75,47 @@ namespace AudioBlend.API.Controllers.MusicData.Songs
             }
             return Ok(res.Data);
         }
+
+        [HttpGet("artist/{artistId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByArtist([FromRoute] Guid artistId)
+        {
+            var res = await _songService.GetByArtistId(artistId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
+        [Authorize]
+        [HttpGet("liked")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetLikedSongs()
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _songService.GetLikedSongs(userId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+        [HttpGet("liked/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetLikedSongsByUser([FromRoute] string userId)
+        {
+            var res = await _songService.GetLikedSongs(userId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
     }
 }

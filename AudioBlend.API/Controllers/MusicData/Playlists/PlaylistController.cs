@@ -72,7 +72,7 @@ namespace AudioBlend.API.Controllers.MusicData.Playlists
         public async Task<IActionResult> GetLikedByCurrentUser()
         {
             var userId = _currentUserService.GetUserId;
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User not found");
             }

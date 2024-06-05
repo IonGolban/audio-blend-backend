@@ -10,7 +10,7 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
         Task<Response<List<SongQueryDto>>> GetRecommendations(int count);
         Task<Response<List<SongQueryDto>>> GetByGenre(string genre, int count);
         Task<Response<List<SongQueryDto>>> GetByGenres(List<string> genres, int count);
-
-
+        Task<Response<List<SongQueryDto>>> GetByArtistId(Guid artistId);
+        Task<Response<List<SongQueryDto>>> GetLikedSongs(string userId);
     }
 }

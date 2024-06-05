@@ -1,4 +1,5 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Albums;
+using AudioBlend.Core.MusicData.Models.DTOs.Searches;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Implementations;
 using AudioBlend.Core.Shared.Results;
@@ -122,6 +123,48 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
 
             return Result<List<Album>>.Success(result);
 
+        }
+
+        public async Task<Result<List<SearchRepoResult<Album>>>> SearchByAlbumName(string albumName, int treshold, int count)
+        {
+            var result = await _context.Albums
+                .Include(a => a.Artist)
+                .Select(a => new
+                {
+                    Album = a,
+                    Score = AudioBlendContext.LevenshteinDistance(a.Title, albumName)
+                })
+                .Where(a => a.Score <= treshold)
+                .OrderBy(a => a.Score)
+                .Take(count)
+                .ToListAsync();
+
+            if(result.Count == 0)
+            {
+                return Result<List<SearchRepoResult<Album>>>.Failure("No albums found");
+            }
+
+            return Result<List<SearchRepoResult<Album>>>.Success(result
+                .Select(a => new SearchRepoResult<Album> { 
+                    Result = a.Album, Score = a.Score })
+                .ToList());
+        }
+
+        public async Task<Result<List<Album>>> GetByArtistId(Guid id)
+        {
+            var result = await _context.Albums
+                .Include(a => a.Artist)
+                .Include(a => a.Songs)
+                .Include(a => a.LikedByUsers)
+                .Where(a => a.ArtistId == id)
+                .ToListAsync();
+
+            if (result == null)
+            {
+                return Result<List<Album>>.Failure("No albums found");
+            }
+
+            return Result<List<Album>>.Success(result);
         }
     }
 }

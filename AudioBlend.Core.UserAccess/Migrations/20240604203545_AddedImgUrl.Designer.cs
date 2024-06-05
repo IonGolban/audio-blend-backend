@@ -3,6 +3,7 @@ using System;
 using AudioBlend.Core.UserAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBlend.Core.UserAccess.Migrations
 {
     [DbContext(typeof(UserAccessContext))]
-    partial class UserAccessContextModelSnapshot : ModelSnapshot
+    [Migration("20240604203545_AddedImgUrl")]
+    partial class AddedImgUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

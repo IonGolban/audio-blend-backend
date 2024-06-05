@@ -71,9 +71,9 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
 
         }
 
-        [HttpGet("random/{count}")]
+        [HttpGet("random")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetRandom(int count)
+        public async Task<IActionResult> GetRandom([FromQuery]int count)
         {
             var res = await _albumService.GetRandomAlbums(count);
             if (!res.Success)
@@ -84,9 +84,9 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
         }
 
         [Authorize]
-        [HttpGet("auth/random/{count}")]
+        [HttpGet("auth/random")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetRandomAuth(int count)
+        public async Task<IActionResult> GetRandomAuth([FromQuery]int count)
         {
             var res = await _albumService.GetRecommendedAlbums(count);
             if (!res.Success)
@@ -120,5 +120,16 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
             return Ok(res.Data);
         }
 
+        [HttpGet("artist/{artistId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByArtistId([FromRoute] Guid artistId)
+        {
+            var res = await _albumService.GetByArtistId(artistId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
     }
 }

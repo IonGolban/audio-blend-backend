@@ -64,7 +64,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         public async Task<Response<List<Playlist>>> GetPlaylistsByCurrentUser()
         {
             var currentUserId = _currentUserService.GetUserId;
-            if (currentUserId == null)
+            if (string.IsNullOrEmpty(currentUserId))
             {
                 return new Response<List<Playlist>>()
                 {

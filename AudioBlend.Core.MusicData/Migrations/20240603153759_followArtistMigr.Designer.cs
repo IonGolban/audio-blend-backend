@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AudioBlend.Core.MusicData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBlend.Core.MusicData.Migrations
 {
     [DbContext(typeof(AudioBlendContext))]
-    partial class AudioBlendContextModelSnapshot : ModelSnapshot
+    [Migration("20240603153759_followArtistMigr")]
+    partial class followArtistMigr
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,19 +98,8 @@ namespace AudioBlend.Core.MusicData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CoverUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("Likes")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -309,7 +301,7 @@ namespace AudioBlend.Core.MusicData.Migrations
             modelBuilder.Entity("AudioBlend.Core.MusicData.Models.Playlists.PlaylistSong", b =>
                 {
                     b.HasOne("AudioBlend.Core.MusicData.Domain.Playlists.Playlist", "Playlist")
-                        .WithMany("PlaylistSongs")
+                        .WithMany("playlistSongs")
                         .HasForeignKey("PlaylistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -341,7 +333,7 @@ namespace AudioBlend.Core.MusicData.Migrations
                 {
                     b.Navigation("LikedByUsers");
 
-                    b.Navigation("PlaylistSongs");
+                    b.Navigation("playlistSongs");
                 });
 
             modelBuilder.Entity("AudioBlend.Core.MusicData.Domain.Songs.Song", b =>

@@ -8,6 +8,7 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
     {
         Task<Response<List<AlbumQueryDto>>> GetAllAlbums();
         Task<Response<AlbumQueryDto>> GetAlbumById(Guid albumId);
+        Task<Response<List<AlbumQueryDto>>> GetByArtistId(Guid artistId);
         Task<Response<List<AlbumQueryDto>>> GetLikedUserAlbums(string userId);
         Task<Response<List<AlbumQueryDto>>> GetRandomAlbums(int count);
         Task<Response<List<AlbumQueryDto>>> GetRecommendedAlbums(int count);

@@ -137,9 +137,13 @@ builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 
 builder.Services.AddScoped<IArtistRepository,ArtistRepository>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
+
+builder.Services.AddScoped<IFollowArtistRepository, FollowArtistRepository>();
+builder.Services.AddScoped<IFollowService, FollowService>();
 
 builder.Services.AddScoped<IRecommendationService,RecommendationService>();
-
+builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ILikeAlbumRepository, LikeAlbumRepository>();
 builder.Services.AddScoped<ILikePlaylistRepository, LikePlaylistRepository>();
 builder.Services.AddScoped<ILikeSongRepository, LikeSongRepository>();

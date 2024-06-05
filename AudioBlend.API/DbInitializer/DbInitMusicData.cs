@@ -1,25 +1,30 @@
-﻿using AudioBlend.API.DbInitializer.Models;
+﻿using AudioBlend.Core.MusicData.Domain.Songs;
+using AudioBlend.Core.MusicData.Models.Likes;
+using AudioBlend.Core.MusicData.Models.Playlists;
+using AudioBlend.Core.MusicData.Domain.Playlists;
+using AudioBlend.Core.UserAccess.Models.Users;
+using Microsoft.AspNetCore.Identity;
+using AudioBlend.API.DbInitializer.Models;
 using AudioBlend.Core.MusicData;
 using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Domain.Artists;
-using AudioBlend.Core.MusicData.Domain.Playlists;
-using AudioBlend.Core.MusicData.Domain.Songs;
-using AudioBlend.Core.MusicData.Models.Likes;
-using AudioBlend.Core.MusicData.Models.Playlists;
-using AudioBlend.Core.UserAccess;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AudioBlend.Core.UserAccess.Models.Roles;
-using AudioBlend.Core.UserAccess.Models.Users;
-using Microsoft.AspNetCore.Identity;
+using AudioBlend.Core.UserAccess;
 
 namespace AudioBlend.API.DbInitializer
 {
     public static class DbInitMusicData
     {
-        private const string PATH_DATA = "C:\\\\Users\\\\uig26544\\\\Desktop\\\\Copyright-Free-Music\\\\info\\\\songs_info1.json";
-        private const string PATH_IMAGES = "C:\\\\Users\\\\uig26544\\\\Desktop\\\\Copyright-Free-Music";
+        private const string PATH_DATA = "C:\\Users\\uig26544\\Desktop\\Copyright-Free-Music\\info\\songs_info1.json";
+        private const string PATH_IMAGES = "C:\\Users\\uig26544\\Desktop\\Copyright-Free-Music";
 
         private static List<Artist> usedArtists = new List<Artist>();
         private static List<String> songsUrl = new List<String>();
+
         public async static Task InitData(IServiceProvider serviceProvider)
         {
             songsUrl = SongBlobUrls.GetUrls();
@@ -34,40 +39,41 @@ namespace AudioBlend.API.DbInitializer
             albums_db = RemoveAlbumsWithoutSongs(albums_db, songs_db);
 
             var playlistsDb = GenerateRandomPlaylists(songs_db, users);
+            Console.WriteLine("Playlists count: " + playlistsDb.Count);
             var playlistSongsDb = GenerateRandomPlaylistSongs(playlistsDb, songs_db);
 
             var likes_album = GenerateRandomLikesAlbum(albums_db, users);
             var likes_songs = GenerateRandomLikesSong(songs_db, users);
             var likes_playlist = GenerateRandomLikesPlaylist(playlistsDb, users);
+            var follows_artists = GenerateRandomFollowsArtist(artists_db, users);
 
-            await SaveModelsDb(serviceProvider, artists_db, albums_db, songs_db, playlistsDb, likes_album, likes_playlist, likes_songs, playlistSongsDb);
+            await SaveModelsDb(serviceProvider, artists_db, albums_db, songs_db, playlistsDb, likes_album, likes_playlist, likes_songs, playlistSongsDb, follows_artists);
         }
 
         private static List<PlaylistSong> GenerateRandomPlaylistSongs(List<Playlist> playlistsDb, List<Song> songs_db)
         {
             List<PlaylistSong> playlistSongs = new List<PlaylistSong>();
             Random rnd = new Random();
-            List<Playlist> tempPLaylist = new List<Playlist>();
-            
-            for (int i = 0; i < 2000; i++)
+
+            foreach (var playlist in playlistsDb)
             {
-                
-                var playlist = playlistsDb[rnd.Next(0, playlistsDb.Count)];
-                var song = songs_db[rnd.Next(0, songs_db.Count)];
-
-                if (playlistSongs.Any(ps => ps.PlaylistId == playlist.Id && ps.SongId == song.Id))
+                var numberOfSongs = rnd.Next(5, 20); // Each playlist will have between 5 and 20 songs
+                for (int i = 0; i < numberOfSongs; i++)
                 {
-                    continue;
-                }
+                    var song = songs_db[rnd.Next(0, songs_db.Count)];
+                    if (playlistSongs.Any(ps => ps.PlaylistId == playlist.Id && ps.SongId == song.Id))
+                    {
+                        continue;
+                    }
 
-                playlistSongs.Add(new PlaylistSong(playlist.Id, song.Id));
-                tempPLaylist.Add(playlist);
+                    playlistSongs.Add(new PlaylistSong(playlist.Id, song.Id));
+                }
             }
 
             return playlistSongs;
         }
 
-        private static async Task SaveModelsDb(IServiceProvider serviceProvider, List<Artist> artists_db, List<Album> albums_db, List<Song> songs_db, List<Playlist> playlistsDb, List<LikeAlbum> likes_album, List<LikePlaylist> likes_playlist, List<LikeSong> likes_songs, List<PlaylistSong> playlistSongsDb)
+        private static async Task SaveModelsDb(IServiceProvider serviceProvider, List<Artist> artists_db, List<Album> albums_db, List<Song> songs_db, List<Playlist> playlistsDb, List<LikeAlbum> likes_album, List<LikePlaylist> likes_playlist, List<LikeSong> likes_songs, List<PlaylistSong> playlistSongsDb, List<FollowArtist> follows_artists)
         {
             var context = serviceProvider.GetRequiredService<AudioBlendContext>();
 
@@ -79,7 +85,30 @@ namespace AudioBlend.API.DbInitializer
             await context.LikePlaylists.AddRangeAsync(likes_playlist);
             await context.LikeSongs.AddRangeAsync(likes_songs);
             await context.PlaylistSongs.AddRangeAsync(playlistSongsDb);
+            await context.FollowArtists.AddRangeAsync(follows_artists);
             await context.SaveChangesAsync();
+        }
+
+        private static List<FollowArtist> GenerateRandomFollowsArtist(List<Artist> artists_db, List<User> users)
+        {
+            var follows_artists = new List<FollowArtist>();
+
+            Random rnd = new Random();
+            foreach (var user in users)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var artist = artists_db[rnd.Next(0, artists_db.Count)];
+                    if (follows_artists.Any(f => f.UserId == user.Id && f.ArtistId == artist.Id))
+                    {
+                        continue;
+                    }
+
+                    var follow = new FollowArtist(user.Id, artist.Id);
+                    follows_artists.Add(follow);
+                }
+            }
+            return follows_artists;
         }
 
         private static List<LikePlaylist> GenerateRandomLikesPlaylist(List<Playlist> playlistsDb, List<User> users)
@@ -91,18 +120,18 @@ namespace AudioBlend.API.DbInitializer
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    var playlist = playlistsDb[rnd.Next(0, playlistsDb.Count)];
+                    Console.WriteLine("Playlist count: " + playlistsDb.Count);
+                    var playlist = playlistsDb[rnd.Next(0, playlistsDb.Count-1)];
                     if (likes_playlist.Any(l => l.UserId == user.Id && l.PlaylistId == playlist.Id))
                     {
                         continue;
                     }
-                        
+
                     var like = new LikePlaylist(user.Id, playlist.Id);
                     likes_playlist.Add(like);
                 }
             }
             return likes_playlist;
-
         }
 
         private static List<LikeSong> GenerateRandomLikesSong(List<Song> songs, List<User> users)
@@ -124,7 +153,6 @@ namespace AudioBlend.API.DbInitializer
                 }
             }
             return likes_songs;
-
         }
 
         private static List<LikeAlbum> GenerateRandomLikesAlbum(List<Album> albums_db, List<User> users)
@@ -163,7 +191,7 @@ namespace AudioBlend.API.DbInitializer
                     Email = "user" + i + "@gmail.com",
                     SecurityStamp = Guid.NewGuid().ToString(),
                 };
-                var result = await userManager.CreateAsync(user, "Password@"+i);
+                var result = await userManager.CreateAsync(user, "Password@" + i);
                 if (!result.Succeeded)
                 {
                     Console.WriteLine("Error creating user: " + user.UserName);
@@ -186,7 +214,14 @@ namespace AudioBlend.API.DbInitializer
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    var playlist = new Playlist(Guid.NewGuid(), Faker.Lorem.Sentence(), true, user.Id);
+                    var playlist = new Playlist(
+                        Guid.NewGuid(),
+                        Faker.Lorem.Sentence(),
+                        rnd.Next(0, 2) == 1,
+                        user.Id,
+                        $"https://picsum.photos/seed/{rnd.Next(0,10000)}/200/300",
+                        Faker.Lorem.Paragraph()
+                    );
                     playlists.Add(playlist);
                 }
             }
@@ -218,7 +253,6 @@ namespace AudioBlend.API.DbInitializer
                         ArtistId = artist_db_model.Id,
                         AlbumId = album_db_model.Id,
                         AudioUrl = song_url,
-                        
                     };
                     songs_db.Add(song_db_model);
                 }
@@ -249,7 +283,6 @@ namespace AudioBlend.API.DbInitializer
                                 ArtistId = artist_db_model.Id,
                                 AlbumId = album_db_model.Id,
                                 AudioUrl = song_url
-
                             };
                             songs_db.Add(song_db_model);
                         }
@@ -337,6 +370,7 @@ namespace AudioBlend.API.DbInitializer
 
             return albumDbModels;
         }
+
         private static List<Song> RemoveDuplicateSongs(List<Song> songs)
         {
             HashSet<string> songTitles = new HashSet<string>();
@@ -353,6 +387,7 @@ namespace AudioBlend.API.DbInitializer
 
             return uniqueSongs;
         }
+
         private static List<Album> RemoveDuplicateAlbums(List<Album> albums)
         {
             HashSet<string> albumTitles = new HashSet<string>();
@@ -384,7 +419,5 @@ namespace AudioBlend.API.DbInitializer
 
             return albumsWithSongs;
         }
-
-
     }
 }

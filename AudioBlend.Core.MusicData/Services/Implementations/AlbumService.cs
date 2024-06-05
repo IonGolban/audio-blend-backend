@@ -311,6 +311,22 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        
+        public async Task<Response<List<AlbumQueryDto>>> GetByArtistId(Guid artistId)
+        {
+            var result = await _albumRepository.GetByArtistId(artistId);
+            if (!result.IsSuccess)
+            {
+                return new Response<List<AlbumQueryDto>>()
+                {
+                    Success = false,
+                    Message = result.ErrorMsg
+                };
+            }
+            return new Response<List<AlbumQueryDto>>()
+            {
+                Data = result.Value.Select(AlbumMapper.MapToAlbumQueryDto).ToList(),
+                Success = true
+            };
+        }
     }
 }

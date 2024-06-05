@@ -43,6 +43,76 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             throw new NotImplementedException();
         }
 
+        public async Task<Response<List<LikeSong>>> GetLikeSongsByAlbum(string userId, Guid albumId)
+        {
+            var validatePostInputs = await ValidatePostInputs(userId, albumId);
+            if(validatePostInputs != null)
+            {
+                return new Response<List<LikeSong>>
+                {
+                    Success = false,
+                    Message = validatePostInputs
+                };
+            }
+
+            var album = await _albumRepository.GetByIdAsync(albumId);
+
+            if (!album.IsSuccess)
+            {
+                return new Response<List<LikeSong>>
+                {
+                    Success = false,
+                    Message = album.ErrorMsg
+                };
+            }
+
+            var listLikeSongs = new List<LikeSong>();
+
+            foreach(var song in album.Value.Songs)
+            {
+                var likeSong = await _likeSongRepository.GetLikeSong(userId, song.Id);
+                if (likeSong.IsSuccess)
+                {
+                    listLikeSongs.Add(likeSong.Value);
+                }
+            }
+
+            return new Response<List<LikeSong>>
+            {
+                Data = listLikeSongs,
+                Success = true
+            };
+        }
+
+        public async Task<Response<List<LikeSong>>> GetLikeSongsByPlaylist(string userId, Guid id)
+        {
+            var result = await _playlistRepository.GetByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                return new Response<List<LikeSong>>
+                {
+                    Success = false,
+                    Message = result.ErrorMsg
+                };
+            }
+            var listLikeSongs = new List<LikeSong>();
+            
+            foreach (var song in result.Value.PlaylistSongs)
+            {
+                var likeSong = await _likeSongRepository.GetLikeSong(userId, song.SongId);
+                if (likeSong.IsSuccess)
+                {
+                    listLikeSongs.Add(likeSong.Value);
+                }
+            }
+
+            return new Response<List<LikeSong>>
+            {
+                Data = listLikeSongs,
+                Success = true
+            };
+        }
+
         public async Task<Response<LikeAlbum>> LikeAlbum(string userId, Guid albumId)
         {
             var validatePostInputs = await ValidatePostInputs(userId, albumId);

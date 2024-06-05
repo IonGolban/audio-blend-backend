@@ -107,7 +107,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 var playlist = await _playlistRepository.GetByIdAsync(like.PlaylistId);
                 if (playlist.IsSuccess)
                 {
-                    foreach (var song in playlist.Value.playlistSongs.Select(ps => ps.Song))
+                    foreach (var song in playlist.Value.PlaylistSongs.Select(ps => ps.Song))
                     {
                         foreach (var genre in song.Genres)
                         {
@@ -127,7 +127,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             var ownedPlaylists = await _playlistRepository.GetPlaylistsByUserId(userId);
             foreach (var playlist in ownedPlaylists.Value)
             {
-                foreach (var song in playlist.playlistSongs.Select(ps => ps.Song))
+                foreach (var song in playlist.PlaylistSongs.Select(ps => ps.Song))
                 {
                     foreach (var genre in song.Genres)
                     {

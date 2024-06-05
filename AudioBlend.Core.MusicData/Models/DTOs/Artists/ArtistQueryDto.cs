@@ -5,8 +5,8 @@
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string ImageUrl { get; set; }
-        public List<string> Genres { get; private set; }
+        public List<string> Genres { get;  set; }
         public int Followers { get; set; }
-        public string UserId { get; private set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
     }
 }

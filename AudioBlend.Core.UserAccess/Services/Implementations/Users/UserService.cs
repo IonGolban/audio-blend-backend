@@ -31,7 +31,9 @@ namespace AudioBlend.Core.UserAccess.Services.Implementations.Users
                 {
                     Id = user.Id,
                     Username = user.UserName,
-                    Email = user.Email
+                    Email = user.Email,
+                    ImgUrl = user.ImgUrl
+                    
                 }
             };
         }

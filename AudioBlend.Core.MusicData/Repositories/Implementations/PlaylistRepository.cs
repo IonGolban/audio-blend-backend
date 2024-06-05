@@ -1,5 +1,6 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Playlists;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
+using AudioBlend.Core.Shared.Responses;
 using AudioBlend.Core.Shared.Results;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,7 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
         {
             var playlists = await _context.Playlists
                   .Include(p => p.LikedByUsers)
-                  .Include(p => p.playlistSongs)
+                  .Include(p => p.PlaylistSongs)
                     .ThenInclude(ps => ps.Song)
                   .Where(p => p.UserId == userId).ToListAsync();
             if (playlists == null)
@@ -29,7 +30,7 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
             var playlists = await _context.LikePlaylists
                 .Where(lp => lp.UserId == userId)
                 .Include(lp => lp.Playlist)
-                .ThenInclude(p => p.playlistSongs)
+                .ThenInclude(p => p.PlaylistSongs)
                 .ThenInclude(ps => ps.Song)
                 .ToListAsync();
 
@@ -39,8 +40,22 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
             }
 
             return Result<List<Playlist>>.Success(playlists.Select(lp => lp.Playlist).ToList());
+        }
+        public async override Task<Result<Playlist>> GetByIdAsync(Guid id)
+        {
+            var playlist = await _context.Playlists
+                .Include(p => p.LikedByUsers)
+                .Include(p => p.PlaylistSongs)
+                .ThenInclude(ps => ps.Song)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-    
+            if (playlist == null)
+            {
+                return Result<Playlist>.Failure($"Playlist with id = {id} not found");
+            }
+
+            return Result<Playlist>.Success(playlist);
+
         }
 
     }

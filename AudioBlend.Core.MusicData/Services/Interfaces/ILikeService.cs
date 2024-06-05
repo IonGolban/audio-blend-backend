@@ -1,5 +1,6 @@
 ﻿using AudioBlend.Core.MusicData.Models.Likes;
 using AudioBlend.Core.Shared.Responses;
+using System.Threading.Tasks;
 
 namespace AudioBlend.Core.MusicData.Services.Interfaces
 {
@@ -11,6 +12,9 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
         Task<Response<LikeSong>> UnlikeSong(string userId, Guid songId);
         Task<Response<LikeAlbum>> UnlikeAlbum(string userId, Guid albumId);
         Task<Response<LikePlaylist>> UnlikePlaylist(string userId, Guid playlistId);
+        Task<Response<List<LikeSong>>> GetLikeSongsByAlbum(string userId, Guid albumId);
+        Task<Response<List<LikeSong>>> GetLikeSongsByPlaylist(string userId, Guid id);
+        Task<Response<LikeSong>> CheckAlbumLikeByUser(string userId, Guid albumId);
         //Task<Response<string>> GetCountLikesPlaylist(Guid playlistId);
         //Task<Response<string>> GetCountLikesAlbum(Guid albumId);
         //Task<Response<string>> GetCountLikesSong(Guid songId);
