@@ -19,7 +19,6 @@ using AudioBlend.Core.Streaming.Services.Interfaces;
 using AudioBlend.Core.Streaming.Services.Implementations;
 using AudioBlend.Core.UserAccess.Services.Interfaces.Users;
 using AudioBlend.Core.UserAccess.Services.Implementations.Users;
-using AudioBlend.API.Services.Interfaces;
 using AudioBlend.API.Services.Implementations;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Implementations;
@@ -135,6 +134,11 @@ builder.Services.AddScoped<ISongService, SongService>();
 
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddScoped<IPlaylistServiceCommand, PlaylistServiceCommand>();
+
+builder.Services.AddScoped<IPlaylistSongRepository, PlaylistSongRepository>();
+builder.Services.AddScoped<IPlaylistSongService, PlaylistSongService>();
+
 
 builder.Services.AddScoped<IArtistRepository,ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();

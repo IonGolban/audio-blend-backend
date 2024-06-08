@@ -11,7 +11,7 @@ namespace AudioBlend.Core.MusicData.Domain.Playlists
         public string Title { get; private set; }
         public bool IsPublic { get; private set; }
         public string UserId{ get; private set; }
-        public string CoverUrl { get; private set; }
+        public string? CoverUrl { get; private set; }
         public string Description { get; private set; }
         public int Likes { get; private set; }
         public ICollection<LikePlaylist> LikedByUsers { get; private set; } = [];

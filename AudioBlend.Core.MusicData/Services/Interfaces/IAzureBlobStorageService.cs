@@ -1,6 +1,7 @@
 ﻿using AudioBlend.Core.Shared.Results;
+using Microsoft.AspNetCore.Http;
 
-namespace AudioBlend.API.Services.Interfaces
+namespace AudioBlend.Core.MusicData.Services.Interfaces
 {
     public interface IAzureBlobStorageService
     {

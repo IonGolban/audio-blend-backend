@@ -1,4 +1,4 @@
-﻿using AudioBlend.API.Services.Interfaces;
+﻿using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.Shared.Results;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;

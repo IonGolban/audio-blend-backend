@@ -24,4 +24,8 @@
     <ProjectReference Include="..\AudioBlend.Core.UserAccess\AudioBlend.Core.UserAccess.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Interfaces\" />
+  </ItemGroup>
+
 </Project>

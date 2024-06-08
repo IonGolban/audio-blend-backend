@@ -28,6 +28,87 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             _userManager = userManager;
         }
 
+        public async Task<Response<LikePlaylist>> GetPlaylistLikeByUser(string userId, Guid playlistId)
+        {
+            var validatePostInputs = await ValidatePostInputs(userId, playlistId);
+            if (validatePostInputs != null)
+            {
+                return new Response<LikePlaylist>
+                {
+                    Success = false,
+                    Message = validatePostInputs
+                };
+            }
+
+            var playlist = await _playlistRepository.GetByIdAsync(playlistId);
+
+            if (!playlist.IsSuccess)
+            {
+                return new Response<LikePlaylist>
+                {
+                    Success = false,
+                    Message = playlist.ErrorMsg
+                };
+            }
+
+            var likePlaylist = await _likePlaylistRepository.GetLikePlaylist(userId, playlistId);
+            if (!likePlaylist.IsSuccess)
+            {
+                return new Response<LikePlaylist>
+                {
+                    Success = true,
+                    Message = likePlaylist.ErrorMsg
+                };
+            }
+
+            return new Response<LikePlaylist>
+            {
+                Data = likePlaylist.Value,
+                Success = true
+            };
+        }
+
+        public async Task<Response<LikeAlbum>> GetAlbumLikeByUser(string userId, Guid albumId)
+        {
+            var validatePostInputs = await ValidatePostInputs(userId, albumId);
+            if (validatePostInputs != null)
+            {
+                return new Response<LikeAlbum>
+                {
+                    Success = false,
+                    Message = validatePostInputs
+                };
+            }
+
+            var album = await _albumRepository.GetByIdAsync(albumId);
+
+            if(!album.IsSuccess)
+            {
+                return new Response<LikeAlbum>
+                {
+                    Success = false,
+                    Message = album.ErrorMsg
+                };
+            }
+
+            var likeSong = await _likeAlbumRepository.GetLikeAlbum(userId, album.Value.Id);
+            if(!likeSong.IsSuccess)
+            {
+                return new Response<LikeAlbum>
+                {
+                    Success = true,
+                    Message = likeSong.ErrorMsg
+                };
+            }
+
+            return new Response<LikeAlbum>
+            {
+                Data = likeSong.Value,
+                Success = true
+            };
+
+        }
+
         public Task<Response<string>> GetCountLikesAlbum(Guid albumId)
         {
             throw new NotImplementedException();
@@ -389,6 +470,8 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
 
         }
+
+
 
         private async Task<string?> ValidatePostInputs(string userId, Guid id)
         {

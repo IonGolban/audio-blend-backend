@@ -1,4 +1,5 @@
-﻿using AudioBlend.Core.MusicData.Services.Interfaces;
+﻿using AudioBlend.Core.MusicData.Models.DTOs.Playlists;
+using AudioBlend.Core.MusicData.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -11,11 +12,13 @@ namespace AudioBlend.API.Controllers.MusicData.Playlists
     {
         private readonly IPlaylistService _playlistService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IPlaylistServiceCommand _playlistServiceCommand;
 
-        public PlaylistController(IPlaylistService playlistService, ICurrentUserService currentUserService)
+        public PlaylistController(IPlaylistService playlistService, ICurrentUserService currentUserService, IPlaylistServiceCommand playlistServiceCommand)
         {
             _playlistService = playlistService;
             _currentUserService = currentUserService;
+            _playlistServiceCommand = playlistServiceCommand;
         }
 
         [HttpGet]
@@ -90,6 +93,20 @@ namespace AudioBlend.API.Controllers.MusicData.Playlists
         {
             var userId = _currentUserService.GetUserId;
             var response = await _playlistService.GetLikedUserPlaylists(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(response.Data);
+        }
+
+        [Authorize]
+        [HttpPost("add")]
+        
+        public async Task<IActionResult> AddPlaylist(CreatePlaylistDto playlist)
+        {
+            var response = await _playlistServiceCommand.AddPlaylist(playlist);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
