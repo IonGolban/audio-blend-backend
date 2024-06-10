@@ -27,6 +27,7 @@ using AudioBlend.API.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -54,7 +55,6 @@ builder.Services.AddSwaggerGen(c =>
                 Scheme = "oauth2",
                 Name = "Bearer",
                 In = ParameterLocation.Header,
-
             },
             new List<string>()
         }
@@ -65,23 +65,19 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Title = "AudioBlend API"
     });
-
 });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
 var connectionString = builder.Configuration.GetConnectionString("AudioBlendConnection");
-builder.Services.AddDbContext<AudioBlendContext>(options => options.UseNpgsql(
-    connectionString, o => o.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "music_data")));
-
+builder.Services.AddDbContext<AudioBlendContext>(options =>
+    options.UseNpgsql(connectionString, o => o.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "music_data"))
+);
 builder.Services.AddDbContext<UserAccessContext>(options =>
-    options.UseNpgsql(connectionString,
-    o => o.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "user_access")));
+    options.UseNpgsql(connectionString, o => o.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "user_access"))
+);
 
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<UserAccessContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<UserAccessContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddIdentityCore<User>()
     .AddRoles<IdentityRole>()
@@ -105,9 +101,10 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? string.Empty))
     };
 });
+
 builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
@@ -115,13 +112,10 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 
 builder.Services.AddCors(o => o.AddPolicy("CorsPolicy", b =>
 {
-    b.WithOrigins("*")
+    b.AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader();
 }));
-
-
-
 
 builder.Services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
@@ -131,31 +125,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAudioProivderService, AudioProivderService>();
 builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddScoped<ISongService, SongService>();
-
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IPlaylistServiceCommand, PlaylistServiceCommand>();
-
 builder.Services.AddScoped<IPlaylistSongRepository, PlaylistSongRepository>();
 builder.Services.AddScoped<IPlaylistSongService, PlaylistSongService>();
-
-
-builder.Services.AddScoped<IArtistRepository,ArtistRepository>();
+builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
-
 builder.Services.AddScoped<IFollowArtistRepository, FollowArtistRepository>();
 builder.Services.AddScoped<IFollowService, FollowService>();
-
-builder.Services.AddScoped<IRecommendationService,RecommendationService>();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ILikeAlbumRepository, LikeAlbumRepository>();
 builder.Services.AddScoped<ILikePlaylistRepository, LikePlaylistRepository>();
 builder.Services.AddScoped<ILikeSongRepository, LikeSongRepository>();
 builder.Services.AddScoped<ILikeService, LikeService>();
-
-
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-
 
 var app = builder.Build();
 
@@ -169,7 +154,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     // Apply pending migrations
 }
-
 //using (var scope = app.Services.CreateScope())
 //{
 //    var services = scope.ServiceProvider;
@@ -185,13 +169,13 @@ if (app.Environment.IsDevelopment())
 //    userContext.SaveChanges();
 
 //}
-
 app.UseHttpsRedirection();
 
+app.UseCors("CorsPolicy");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors("CorsPolicy");
 
 app.Run();

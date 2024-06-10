@@ -115,6 +115,19 @@ namespace AudioBlend.API.Controllers.MusicData.Playlists
             return Ok(response.Data);
         }
 
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdatePlaylist(UpdatePlaylistDto playlist)
+        {
+            var response = await _playlistServiceCommand.UpdatePlaylist(playlist);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(response.Data);
+        }
+
 
     }
 }

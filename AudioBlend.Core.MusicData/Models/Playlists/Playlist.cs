@@ -36,5 +36,14 @@ namespace AudioBlend.Core.MusicData.Domain.Playlists
             Description = description;
 
         }
+
+        public void Update(string title, string description, bool isPublic, string coverUrl)
+        {
+            Title = title;
+            Description = description;
+            IsPublic = isPublic;
+            CoverUrl = coverUrl;
+        }
+
     }
 }

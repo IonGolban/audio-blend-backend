@@ -17,7 +17,6 @@ namespace AudioBlend.Core.MusicData.Domain.Songs
         public Guid AlbumId { get; set; }
         public Album Album { get; set; }
         public string? AudioUrl { get; set; } = string.Empty;
-
         public ICollection<LikeSong>? LikedByUsers { get; set; }
 
     }

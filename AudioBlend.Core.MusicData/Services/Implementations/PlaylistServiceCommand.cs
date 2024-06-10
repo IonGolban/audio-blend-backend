@@ -5,6 +5,7 @@ using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.Shared.Responses;
 using AudioBlend.Core.Shared.Results;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 
 namespace AudioBlend.Core.MusicData.Services.Implementations
 {
@@ -66,5 +67,64 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             
         }
+
+        public async Task<Response<Playlist>> UpdatePlaylist(UpdatePlaylistDto playlist)
+        {
+            if (playlist.Id == Guid.Empty || string.IsNullOrEmpty(playlist.Name) || string.IsNullOrEmpty(playlist.Description))
+            {
+                return new Response<Playlist>()
+                {
+                    Success = false,
+                    Message = "Invalid inputs"
+                };
+            }
+            var requestedPlaylist = await _playlistRepository.GetByIdAsync(playlist.Id);
+            if (requestedPlaylist == null)
+            {
+                return new Response<Playlist>()
+                {
+                    Success = false,
+                    Message = "Playlist not found"
+                };
+            }
+
+            var coverUrl = requestedPlaylist.Value.CoverUrl;
+            Console.WriteLine(coverUrl);
+            Console.WriteLine(playlist.Image == null);
+            if (playlist.Image != null)
+            {
+                var ImgUrl = await _azureBlobStorageService.UploadFileToBlobAsync(playlist.Image);
+                if (!ImgUrl.IsSuccess)
+                {
+                    return new Response<Playlist>()
+                    {
+                        Success = false,
+                        Message = ImgUrl.ErrorMsg
+                    };
+                }
+                coverUrl = ImgUrl.Value;
+                Console.WriteLine(coverUrl);
+            }
+
+            requestedPlaylist.Value.Update(playlist.Name, playlist.Description, playlist.IsPublic, coverUrl);
+            
+
+            var result = await _playlistRepository.UpdateAsync(requestedPlaylist.Value);
+            if (!result.IsSuccess)
+            {
+                return new Response<Playlist>()
+                {
+                    Success = false,
+                    Message = result.ErrorMsg
+                };
+            }
+
+            return new Response<Playlist>()
+            {
+                Data = result.Value,
+                Success = true
+            };      
+        }
     }
 }
+
