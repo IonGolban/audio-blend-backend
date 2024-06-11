@@ -2,6 +2,7 @@
 using AudioBlend.Core.MusicData.Domain.Artists;
 using AudioBlend.Core.MusicData.Domain.Playlists;
 using AudioBlend.Core.MusicData.Domain.Songs;
+using AudioBlend.Core.MusicData.Models.Genres;
 using AudioBlend.Core.MusicData.Models.Likes;
 using AudioBlend.Core.MusicData.Models.Playlists;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace AudioBlend.Core.MusicData
 {
     public class AudioBlendContext : DbContext
     {
-        public AudioBlendContext(DbContextOptions<AudioBlendContext> dbContextOptions) : base(dbContextOptions){}
+        public AudioBlendContext(DbContextOptions<AudioBlendContext> dbContextOptions) : base(dbContextOptions) { }
 
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
@@ -21,23 +22,29 @@ namespace AudioBlend.Core.MusicData
         public DbSet<LikeSong> LikeSongs { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
         public DbSet<FollowArtist> FollowArtists { get; set; }
+        public DbSet<Genre> Genres { get; set; }
 
         [DbFunction("LEVENSHTEIN", IsBuiltIn = true)]
         public static int LevenshteinDistance(string s, string t) => throw new NotImplementedException();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("fuzzystrmatch");
+            modelBuilder.HasDefaultSchema("music_data");
+
             generateArtistModel(modelBuilder);
             generateAlbumModel(modelBuilder);
             generatePlaylistModel(modelBuilder);
             generateSongModel(modelBuilder);
             generateLikeModels(modelBuilder);
-            
+            generateGenreModel(modelBuilder);
             generatePlaylistSongModel(modelBuilder);
-            
-            modelBuilder.HasDefaultSchema("music_data");
         }
-
+        private void generateGenreModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Genre>().HasKey(g => g.Id);
+            modelBuilder.Entity<Genre>().ToTable("genres");
+        }
         private void generatePlaylistSongModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PlaylistSong>().HasKey(ps => new { ps.PlaylistId, ps.SongId });
@@ -52,8 +59,6 @@ namespace AudioBlend.Core.MusicData
         private void generateArtistModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Artist>().HasKey(a => a.Id);
-            //modelBuilder.Entity<Artist>().HasMany(a => a.Albums).WithOne(a => a.Artist).HasForeignKey(a => a.ArtistId);
-            //modelBuilder.Entity<Artist>().HasMany(a => a.Songs).WithOne(s => s.Artist).HasForeignKey(s => s.ArtistId);
             modelBuilder.Entity<Artist>().ToTable("artists");
         }
 
@@ -88,15 +93,12 @@ namespace AudioBlend.Core.MusicData
             modelBuilder.Entity<FollowArtist>().ToTable("follow_artists");
         }
 
-
         private void generateSongModel(ModelBuilder modelBuilder)
         {
-
             modelBuilder.Entity<Song>().HasKey(s => s.Id);
             modelBuilder.Entity<Song>().HasMany(s => s.LikedByUsers).WithOne(l => l.Song).HasForeignKey(l => l.SongId);
-            modelBuilder.Entity<Song>().HasOne(s => s.Artist);
+            modelBuilder.Entity<Song>().HasOne(s => s.Album).WithMany(a => a.Songs).HasForeignKey(s => s.AlbumId);
             modelBuilder.Entity<Song>().ToTable("songs");
-
         }
 
         private void generatePlaylistModel(ModelBuilder modelBuilder)
@@ -107,13 +109,11 @@ namespace AudioBlend.Core.MusicData
             modelBuilder.Entity<Playlist>().ToTable("playlists");
         }
 
-
         private void generateAlbumModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Album>().HasKey(a => a.Id);
             modelBuilder.Entity<Album>().HasMany(a => a.Songs).WithOne(s => s.Album).HasForeignKey(s => s.AlbumId);
             modelBuilder.Entity<Album>().HasMany(a => a.LikedByUsers).WithOne(l => l.Album).HasForeignKey(l => l.AlbumId);
-            modelBuilder.Entity<Album>().HasOne(a => a.Artist);
             modelBuilder.Entity<Album>().ToTable("albums");
         }
     }

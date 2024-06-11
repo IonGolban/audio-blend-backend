@@ -5,17 +5,19 @@ using AudioBlend.Core.MusicData.Mappers;
 using AudioBlend.Core.MusicData.Models.DTOs.Albums;
 using AudioBlend.Core.MusicData.Models.DTOs.Searches;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
+using AudioBlend.Core.MusicData.Models.Genres;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.Shared.Responses;
 
 namespace AudioBlend.Core.MusicData.Services.Implementations
 {
-    public class SearchService(IAlbumRepository albumRepository, ISongRepository songRepository, IArtistRepository artistRepository) : ISearchService
+    public class SearchService(IGenreRepository genreRepository,IAlbumRepository albumRepository, ISongRepository songRepository, IArtistRepository artistRepository) : ISearchService
     {
         private readonly IAlbumRepository _albumRepository = albumRepository;
         private readonly ISongRepository _songRepository = songRepository;
         private readonly IArtistRepository _artistRepository = artistRepository;
+        private readonly IGenreRepository _genreRepository = genreRepository;
         private const int Treshold = 10;
         public async Task<Response<MultipleSearchDto>> SearchAll(string query, int count)
         {
@@ -70,14 +72,21 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 var album = resultAlbums.Value.FirstOrDefault(a => a.Result.Id == result.Key);
                 if (album != null)
                 {
-                    topAlbums.Add(AlbumMapper.MapToAlbumQueryDto(album.Result));
+                    var topSongsAlbums = new List<SongQueryDto>();
+                    foreach (var songAlbum in album.Result.Songs)
+                    {
+                        var genres = await _genreRepository.GetBySongId(songAlbum.Id);
+                        topSongsAlbums.Add(SongMapper.MapToSongQueryDto(songAlbum, songAlbum.Artist, genres.Value));
+                    }
+                    topAlbums.Add(AlbumMapper.MapToAlbumQueryDto(album.Result, topSongsAlbums));
                     continue;
                 }
 
                 var song = resultSongs.Value.FirstOrDefault(s => s.Result.Id == result.Key);
                 if (song != null)
                 {
-                    topSongs.Add(SongMapper.MapToSongQueryDto(song.Result, song.Result.Artist));
+                    var genres = await _genreRepository.GetBySongId(song.Result.Id);
+                    topSongs.Add(SongMapper.MapToSongQueryDto(song.Result, song.Result.Artist, genres.Value));
                     continue;
                 }
 
@@ -99,7 +108,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             {
                 Albums = topAlbums,
                 Songs = topSongs,
-                Aritsts = topArtists
+                Artists = topArtists
             };
 
             return new Response<MultipleSearchDto>()
@@ -121,7 +130,26 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = result.ErrorMsg
                 };
             }
-            var response = result.Value.Select(r => AlbumMapper.MapToAlbumQueryDto(r.Result)).Take(count).ToList();
+            List<AlbumQueryDto> albumQueryDtos = new List<AlbumQueryDto>();
+            foreach(var album in result.Value)
+            {
+                var songs = await _songRepository.GetByAlbumId(album.Result.Id);
+                if (songs.IsSuccess == false)
+                {
+                    return new Response<List<AlbumQueryDto>>
+                    {
+                        Success = false,
+                        Message = songs.ErrorMsg
+                    };
+                }
+                var songsDto = songs.Value.Select(s => SongMapper.MapToSongQueryDto(s, s.Artist, new List<Genre>())).ToList();
+                
+                albumQueryDtos.Add(AlbumMapper.MapToAlbumQueryDto(album.Result, songsDto));
+            }
+
+
+
+            var response = albumQueryDtos.Take(count).ToList();
             return new Response<List<AlbumQueryDto>>()
             {
                 Data = response,
@@ -140,7 +168,9 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = result.ErrorMsg
                 };
             }
-            var response = result.Value.Select((s) => SongMapper.MapToSongQueryDto(s.Result, s.Result.Artist)).Take(count).ToList();
+
+
+            var response = result.Value.Select((s) => SongMapper.MapToSongQueryDto(s.Result, s.Result.Artist, new List<Genre>())).Take(count).ToList();
             return new Response<List<SongQueryDto>>()
             {
                 Data = response,
@@ -166,5 +196,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 Success = true
             };
         }
+
+        
     }
 }

@@ -1,4 +1,5 @@
-﻿using AudioBlend.Core.MusicData.Models.Likes;
+﻿using AudioBlend.Core.MusicData.Models.Genres;
+using AudioBlend.Core.MusicData.Models.Likes;
 
 namespace AudioBlend.Core.MusicData.Domain.Artists
 {
@@ -7,7 +8,7 @@ namespace AudioBlend.Core.MusicData.Domain.Artists
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public string ImgUrl { get; private set; }
-        public List<string> Genres { get; private set; }
+        public List<Guid> GenresIds { get; private set; } = [];
         public int Followers { get; set; }
         public ICollection<FollowArtist>? FollowedByUsers { get; set; }
         public string UserId { get; private set; } = string.Empty;
@@ -21,21 +22,20 @@ namespace AudioBlend.Core.MusicData.Domain.Artists
             Id = id;
             Name = name;
         }
-        public Artist(Guid id, string name, string imgUrl, List<string> genres)
+        public Artist(Guid id, string name, string imgUrl, List<Guid> artistGenres)
         {
             Name = name;
             ImgUrl = imgUrl;
-            Genres = genres;
+            GenresIds = artistGenres;
             Id = id;
         }
-        public Artist(Guid id, string name, string imgUrl, List<string> genres,int followers)
+        public Artist(Guid id, string name, string imgUrl, List<Guid> artistGenres, int followers)
         {
             Name = name;
             ImgUrl = imgUrl;
-            Genres = genres;
+            GenresIds = artistGenres;
             Id = id;
             Followers = followers;
         }
-
     }
 }

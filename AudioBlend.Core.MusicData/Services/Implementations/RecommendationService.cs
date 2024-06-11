@@ -1,10 +1,8 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Domain.Songs;
-using AudioBlend.Core.MusicData.Models.DTOs.Songs;
-using AudioBlend.Core.MusicData.Repositories.Implementations;
+using AudioBlend.Core.MusicData.Models.Genres;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Interfaces;
-using AudioBlend.Core.Shared.Responses;
 
 namespace AudioBlend.Core.MusicData.Services.Implementations
 {
@@ -18,12 +16,13 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         private readonly IAlbumRepository _albumRepository;
         private readonly ICurrentUserService _currentUserService ;
         private readonly IPlaylistRepository _playlistRepository;
+        private readonly IGenreRepository _genreRepository;
         private const int SONG_POINTS = 30;
         private const int ALBUM_SONG_POINTS = 5;
         private const int PLAYLIST_POINTS = 10;
         private const int OWN_PLAYLIST_POINTS = 20;
 
-        public RecommendationService(ILikeSongRepository likeSongRepositry, ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, ICurrentUserService currentUserService, IPlaylistRepository playlistRepository)
+        public RecommendationService(IGenreRepository genreRepository ,ILikeSongRepository likeSongRepositry, ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository, ISongRepository songRepository, IArtistRepository artistRepository, IAlbumRepository albumRepository, ICurrentUserService currentUserService, IPlaylistRepository playlistRepository)
         {
             _likeSongRepositry = likeSongRepositry;
             _likeAlbumRepository = likeAlbumRepository;
@@ -33,9 +32,10 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             _albumRepository = albumRepository;
             _currentUserService = currentUserService;
             _playlistRepository = playlistRepository;
+            _genreRepository = genreRepository;
         }
 
-        public async Task<List<string>> GetRecommendationGenres(string userId, int count)
+        public async Task<List<Genre>> GetRecommendationGenres(string userId, int count)
         {
             var likes = await _likeSongRepositry.GetLikedByUser(userId);
             var likedSongs = new List<Song>();
@@ -55,12 +55,12 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 likedSongs = (await _songRepository.GetRandom(10)).Value;
             }
 
-            var genresCount = new Dictionary<string, int>();
+            var genresCount = new Dictionary<Guid, int>();
 
             // Count genres from liked songs
             foreach (var song in likedSongs)
             {
-                foreach (var genre in song.Genres)
+                foreach (var genre in song.GenresIds)
                 {
                     if (genresCount.ContainsKey(genre))
                     {
@@ -85,7 +85,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     var albumSongs = await _songRepository.GetByAlbumId(album.Value.Id);
                     foreach (var albumSong in albumSongs.Value)
                     {
-                        foreach (var genre in albumSong.Genres)
+                        foreach (var genre in albumSong.GenresIds)
                         {
                             if (genresCount.ContainsKey(genre))
                             {
@@ -109,7 +109,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 {
                     foreach (var song in playlist.Value.PlaylistSongs.Select(ps => ps.Song))
                     {
-                        foreach (var genre in song.Genres)
+                        foreach (var genre in song.GenresIds)
                         {
                             if (genresCount.ContainsKey(genre))
                             {
@@ -129,7 +129,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             {
                 foreach (var song in playlist.PlaylistSongs.Select(ps => ps.Song))
                 {
-                    foreach (var genre in song.Genres)
+                    foreach (var genre in song.GenresIds)
                     {
                         if (genresCount.ContainsKey(genre))
                         {
@@ -147,7 +147,16 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             var topGenres = genresCount.OrderByDescending(g => g.Value).Select(g => g.Key).Take(count).ToList();
 
-            return topGenres;
+            var genres = new List<Genre>();
+            foreach (var genreId in topGenres)
+            {
+                var genre = await _genreRepository.GetByIdAsync(genreId);
+                if (genre.IsSuccess)
+                {
+                    genres.Add(genre.Value);
+                }
+            }
+            return genres;
                
         }
     }

@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace AudioBlend.Core.MusicData.Migrations
+namespace AudioBlend.Core.UserAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class MusicDataSeed123 : Migration
+    public partial class NeuM : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,6 +1,4 @@
-﻿using AudioBlend.Core.MusicData.Domain.Albums;
-using AudioBlend.Core.MusicData.Models.DTOs.Artists;
-using AudioBlend.Core.MusicData.Models.DTOs.Songs;
+﻿using AudioBlend.Core.MusicData.Models.DTOs.Songs;
 
 namespace AudioBlend.Core.MusicData.Models.DTOs.Albums
 {

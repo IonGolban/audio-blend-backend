@@ -1,12 +1,13 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Artists;
 using AudioBlend.Core.MusicData.Domain.Songs;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
+using AudioBlend.Core.MusicData.Models.Genres;
 
 namespace AudioBlend.Core.MusicData.Mappers
 {
     public static class SongMapper
     {
-        public static SongQueryDto MapToSongQueryDto(Song song, Artist artist)
+        public static SongQueryDto MapToSongQueryDto(Song song, Artist artist, List<Genre> genres)
         {
             return new SongQueryDto
             {
@@ -17,7 +18,7 @@ namespace AudioBlend.Core.MusicData.Mappers
                 AlbumId = song.AlbumId,
                 AlbumName = song.Album.Title,
                 Duration = song.Duration,
-                Genres = song.Genres,
+                Genres = genres,
                 CoverUrl = song.Album.CoverUrl,
                 AudioUrl = song.AudioUrl
 

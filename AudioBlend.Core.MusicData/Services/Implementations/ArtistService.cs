@@ -9,10 +9,12 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
     public class ArtistService : IArtistService
     {
         private readonly IArtistRepository _artistRepository;
+        private readonly IGenreRepository _genreRepository;
 
-        public ArtistService(IArtistRepository artistRepository)
+        public ArtistService(IArtistRepository artistRepository, IGenreRepository genreRepository)
         {
             _artistRepository = artistRepository;
+            _genreRepository = genreRepository;
         }
 
         public async Task<Response<List<ArtistQueryDto>>> GetAll()
@@ -27,9 +29,16 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 };
             }
 
+            var artistsDto = new List<ArtistQueryDto>();
+            foreach (var artist in result.Value)
+            {
+                var genres = await _genreRepository.GetByArtistId(artist.Id);
+                artistsDto.Add(ArtistMapper.MapToArtistQueryDto(artist,genres.Value));
+            }
+
             return new Response<List<ArtistQueryDto>>()
             {
-                Data = result.Value.Select(a => ArtistMapper.MapToArtistQueryDto(a)).ToList(),
+                Data = artistsDto,
                 Success = true
             };
 
@@ -46,9 +55,10 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = "Error while getting artist"
                 };
             }
+            var genres = await _genreRepository.GetByArtistId(artist);
             return new Response<ArtistQueryDto>()
             {
-                Data = ArtistMapper.MapToArtistQueryDto(result.Value),
+                Data = ArtistMapper.MapToArtistQueryDto(result.Value, genres.Value),
                 Success = true
             };
         }
@@ -64,9 +74,10 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = "Error while getting artist"
                 };
             }
+            var genres = await _genreRepository.GetByArtistId(result.Value.Id);
             return new Response<ArtistQueryDto>()
             {
-                Data = ArtistMapper.MapToArtistQueryDto(result.Value),
+                Data = ArtistMapper.MapToArtistQueryDto(result.Value, genres.Value),
                 Success = true
             };
         }

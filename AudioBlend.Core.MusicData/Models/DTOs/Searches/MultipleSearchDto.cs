@@ -8,7 +8,7 @@ namespace AudioBlend.Core.MusicData.Models.DTOs.Searches
     {
         public List<AlbumQueryDto> Albums { get; set; }
         public List<SongQueryDto> Songs { get; set; }
-        public List<Artist> Aritsts { get; set; }
+        public List<Artist> Artists { get; set; }
 
     }
 }

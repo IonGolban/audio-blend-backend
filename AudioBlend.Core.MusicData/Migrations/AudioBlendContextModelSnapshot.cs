@@ -68,9 +68,9 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.Property<int>("Followers")
                         .HasColumnType("integer");
 
-                    b.Property<List<string>>("Genres")
+                    b.Property<List<Guid>>("GenresIds")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("uuid[]");
 
                     b.Property<string>("ImgUrl")
                         .IsRequired()
@@ -139,9 +139,9 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
-                    b.Property<List<string>>("Genres")
+                    b.Property<List<Guid>>("GenresIds")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("uuid[]");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -154,6 +154,21 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("songs", "music_data");
+                });
+
+            modelBuilder.Entity("AudioBlend.Core.MusicData.Models.Genres.Genre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("genres", "music_data");
                 });
 
             modelBuilder.Entity("AudioBlend.Core.MusicData.Models.Likes.FollowArtist", b =>

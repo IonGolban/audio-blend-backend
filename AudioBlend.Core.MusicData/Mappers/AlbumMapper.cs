@@ -1,6 +1,7 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Models.DTOs.Albums;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
+using AudioBlend.Core.MusicData.Models.Genres;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace AudioBlend.Core.MusicData.Mappers
     public static class AlbumMapper
     {
 
-        public static AlbumQueryDto MapToAlbumQueryDto(Album album)
+        public static AlbumQueryDto MapToAlbumQueryDto(Album album,List<SongQueryDto> songs)
         {
             return new AlbumQueryDto
             {
@@ -24,7 +25,7 @@ namespace AudioBlend.Core.MusicData.Mappers
                 CoverUrl = album.CoverUrl,
                 ReleaseDate = album.ReleaseDate,
                 Type = album.Type,
-                Songs = album.Songs.Select(s => SongMapper.MapToSongQueryDto(s,album.Artist)).ToList()
+                Songs = songs
             };
         }
     }

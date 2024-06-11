@@ -4,6 +4,7 @@ using AudioBlend.Core.UserAccess.Models.Users;
 using AudioBlend.Core.UserAccess.Services.Interfaces.Users;
 using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.MusicData.Models.DTOs.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace AudioBlend.Core.UserAccess.Services.Implementations.Users
 {
@@ -237,6 +238,39 @@ namespace AudioBlend.Core.UserAccess.Services.Implementations.Users
                     ImgUrl = user.ImgUrl
                 }
             };
+        }
+        
+        public async Task<Response<List<UserDto>>> SerachUsersByQuery(string query, int count)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+
+                return new Response<List<UserDto>>()
+                {
+                    Success = false,
+                    Message = "Query is empty or null"
+                };
+            }
+
+            var users = await _userManger.Users.Where(u => u.UserName.Contains(query)).ToListAsync();
+
+            users = users.OrderBy(u => u.UserName.Length).Take(count).ToList();
+
+
+
+            return new Response<List<UserDto>>()
+            {
+                Success = true,
+                Data = users.Select(u => new UserDto()
+                {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    Email = u.Email,
+                    ImgUrl = u.ImgUrl
+                }).ToList()
+            };
+
+
         }
 
 

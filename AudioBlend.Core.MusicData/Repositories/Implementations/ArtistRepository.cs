@@ -12,7 +12,8 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
 
         public async Task<Result<Artist>> getByUserId(string userId)
         {
-            var result = await _context.Artists.FirstOrDefaultAsync(a => a.UserId == userId);
+            var result = await _context.Artists
+                .FirstOrDefaultAsync(a => a.UserId == userId);
             if (result == null)
             {
                 return Result<Artist>.Failure("No artist found");
@@ -30,6 +31,7 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
                     Score = AudioBlendContext.LevenshteinDistance(name, a.Name)
                 })
                 .Where(a => a.Score <= treshold)
+                .OrderBy(a => a.Score)
                 .Take(count)
                 .ToListAsync();
 

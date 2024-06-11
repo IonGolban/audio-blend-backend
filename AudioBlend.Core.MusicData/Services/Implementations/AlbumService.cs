@@ -15,13 +15,15 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IRecommendationService _recommendationService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IGenreRepository _genreRepository;
 
-        public AlbumService(ICurrentUserService currentUserService, IAlbumRepository albumRepository, UserManager<IdentityUser> userManager, IRecommendationService recommendationService)
+        public AlbumService(IGenreRepository genreRepository,ICurrentUserService currentUserService, IAlbumRepository albumRepository, UserManager<IdentityUser> userManager, IRecommendationService recommendationService)
         {
             _albumRepository = albumRepository;
             _userManager = userManager;
             _recommendationService = recommendationService;
             _currentUserService = currentUserService;
+            _genreRepository = genreRepository;
         }
 
         public async Task<Response<List<AlbumQueryDto>>> GetAllAlbums()
@@ -39,8 +41,14 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             var albumQuery = new List<AlbumQueryDto>();
             foreach (var album in albums.Value)
             {
-                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album));
+                var songsDto = new List<SongQueryDto>();
+                foreach (var song in album.Songs)
+                {
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
 
+                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album,songsDto));
             }
             return new Response<List<AlbumQueryDto>>()
             {
@@ -61,9 +69,28 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 };
             }
 
+            var songsDto = new List<SongQueryDto>();
+            foreach (var song in album.Value.Songs)
+            {
+                var songGenres = await _genreRepository.GetBySongId(song.Id);
+                songsDto.Add(new SongQueryDto()
+                {
+                    Id = song.Id,
+                    Title = song.Title,
+                    Duration = song.Duration,
+                    Genres = songGenres.Value,
+                    AlbumId = song.AlbumId,
+                    AlbumName = song.Album.Title,
+                    ArtistId = song.ArtistId,
+                    ArtistName = album.Value.Artist.Name,
+                    CoverUrl = album.Value.CoverUrl
+                });
+
+            }
+
             return new Response<AlbumQueryDto>()
             {
-                Data = AlbumMapper.MapToAlbumQueryDto(album.Value),
+                Data = AlbumMapper.MapToAlbumQueryDto(album.Value,songsDto),
                 Success = true
             };
         }
@@ -88,9 +115,18 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 };
             }
             var albumsQuery = new List<AlbumQueryDto>();
+
+            var songsDto = new List<SongQueryDto>();
+
+
             foreach (var album in likedAlbums.Value)
             {
-                albumsQuery.Add(AlbumMapper.MapToAlbumQueryDto(album));
+                foreach (var song in album.Songs)
+                {
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
+                albumsQuery.Add(AlbumMapper.MapToAlbumQueryDto(album, songsDto));
             }
 
             return new Response<List<AlbumQueryDto>>()
@@ -134,7 +170,15 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             var albumQuery = new List<AlbumQueryDto>();
             foreach (var album in albums.Value)
             {
-                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album));
+                var songsDto = new List<SongQueryDto>();
+                foreach (var song in album.Songs)
+                {
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
+
+
+                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album, songsDto));
             }
 
             return new Response<List<AlbumQueryDto>>()
@@ -161,13 +205,13 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             var albums = new List<Album>();
             foreach (var genre in genres)
             {
-                var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genre, 5);
+                var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genre.Id, 5);
                 if (responseArtist.IsSuccess)
                 {
                     albums.AddRange(responseArtist.Value);
                 }
 
-                var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genre, 5);
+                var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genre.Id, 5);
                 if (responseSongs.IsSuccess)
                 {
                     albums.AddRange(responseSongs.Value);
@@ -180,30 +224,14 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             foreach (var album in result)
             {
-                albumQuery.Add(new AlbumQueryDto()
+                var songsDto  = new List<SongQueryDto>();   
+
+                foreach (var song in album.Songs)
                 {
-                    Id = album.Id,
-                    Title = album.Title,
-                    ArtistId = album.Artist.Id,
-                    ArtistName = album.Artist.Name,
-
-                    CoverUrl = album.CoverUrl,
-                    ReleaseDate = album.ReleaseDate,
-                    Type = album.Type,
-                    Songs = album.Songs.Select(s => new SongQueryDto()
-                    {
-                        Id = s.Id,
-                        Title = s.Title,
-                        Duration = s.Duration,
-                        Genres = s.Genres,
-                        AlbumId = s.AlbumId,
-                        AlbumName = s.Album.Title,
-                        ArtistId = s.ArtistId,
-                        ArtistName = album.Artist.Name,
-                        CoverUrl = album.CoverUrl
-                    }).ToList()
-
-                });
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
+                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album,songsDto));
             }
             return new Response<List<AlbumQueryDto>>()
             {
@@ -212,7 +240,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        public async Task<Response<List<AlbumQueryDto>>> GetByGenre(string genre, int count)
+        public async Task<Response<List<AlbumQueryDto>>> GetByGenre(Guid genre, int count)
         {
             if (count <= 0)
             {
@@ -223,14 +251,23 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 };
             }
 
+            var genreEntity = await _genreRepository.GetByIdAsync(genre);
+            if(!genreEntity.IsSuccess)
+                return new Response<List<AlbumQueryDto>>()
+                {
+                    Success = false,
+                    Message = genreEntity.ErrorMsg
+                };
+
+
             var albums = new List<Album>();
-            var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genre, count*2);
+            var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genreEntity.Value.Id, count*2);
             if (responseArtist.IsSuccess)
             {
                 albums.AddRange(responseArtist.Value);
             }
 
-            var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genre, count*2);
+            var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genreEntity.Value.Id, count*2);
             if (responseSongs.IsSuccess)
             {
                 albums.AddRange(responseSongs.Value);
@@ -242,30 +279,14 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             foreach (var album in result)
             {
-                albumQuery.Add(new AlbumQueryDto()
+                var genres = await _genreRepository.GetByAlbumId(album.Id);
+                var songs = new List<SongQueryDto>();
+                foreach (var song in album.Songs)
                 {
-                    Id = album.Id,
-                    Title = album.Title,
-                    ArtistId = album.Artist.Id,
-                    ArtistName = album.Artist.Name,
-
-                    CoverUrl = album.CoverUrl,
-                    ReleaseDate = album.ReleaseDate,
-                    Type = album.Type,
-                    Songs = album.Songs.Select(s => new SongQueryDto()
-                    {
-                        Id = s.Id,
-                        Title = s.Title,
-                        Duration = s.Duration,
-                        Genres = s.Genres,
-                        AlbumId = s.AlbumId,
-                        AlbumName = s.Album.Title,
-                        ArtistId = s.ArtistId,
-                        ArtistName = album.Artist.Name,
-                        CoverUrl = album.CoverUrl
-                    }).ToList()
-
-                });
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songs.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
+                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album,songs));
             }
             return new Response<List<AlbumQueryDto>>()
             {
@@ -274,7 +295,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        public async Task<Response<List<AlbumQueryDto>>> GetByGenres(List<string> genres, int count)
+        public async Task<Response<List<AlbumQueryDto>>> GetByGenres(List<Guid> genres, int count)
         {
             if (genres.Count <= 0 || count <= 0)
             {
@@ -289,13 +310,24 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             foreach (var genre in genres)
             {
-                var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genre, count*2);
+                var genreEntity = await _genreRepository.GetByIdAsync(genre);
+
+                if (!genreEntity.IsSuccess)
+                {
+                    return new Response<List<AlbumQueryDto>>()
+                    {
+                        Success = false,
+                        Message = genreEntity.ErrorMsg
+                    };
+                }
+
+                var responseArtist = await _albumRepository.GetRecommendedByGenreFromArtists(genreEntity.Value.Id, count*2);
                 if (responseArtist.IsSuccess)
                 {
                     albums.AddRange(responseArtist.Value);
                 }
 
-                var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genre, count*2);
+                var responseSongs = await _albumRepository.GetRecommendedByGenreFromSongs(genreEntity.Value.Id, count*2);
                 if (responseSongs.IsSuccess)
                 {
                     albums.AddRange(responseSongs.Value);
@@ -303,12 +335,26 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             }
 
             var result = albums.Distinct().Take(count).ToList();
+            
+            var albumQuery = new List<AlbumQueryDto>();
+
+            foreach (var album in result)
+            {
+                var songsDto = new List<SongQueryDto>();
+                foreach (var song in album.Songs)
+                {
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song, album.Artist, songGenres.Value));
+                }
+                albumQuery.Add( AlbumMapper.MapToAlbumQueryDto(album, songsDto));
+            }
 
             return new Response<List<AlbumQueryDto>>()
             {
-                Data = result.Select(AlbumMapper.MapToAlbumQueryDto).ToList(),
+                Data = albumQuery,
                 Success = true
             };
+
         }
 
         public async Task<Response<List<AlbumQueryDto>>> GetByArtistId(Guid artistId)
@@ -322,9 +368,22 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = result.ErrorMsg
                 };
             }
+
+            var albumQuery = new List<AlbumQueryDto>();
+            foreach (var album in result.Value)
+            {
+                var songsDto = new List<SongQueryDto>();
+                foreach (var song in album.Songs)
+                {
+                    var songGenres = await _genreRepository.GetBySongId(song.Id);
+                    songsDto.Add(SongMapper.MapToSongQueryDto(song,album.Artist,songGenres.Value));
+                }
+                albumQuery.Add(AlbumMapper.MapToAlbumQueryDto(album, songsDto));
+            }
+
             return new Response<List<AlbumQueryDto>>()
             {
-                Data = result.Value.Select(AlbumMapper.MapToAlbumQueryDto).ToList(),
+                Data = albumQuery,
                 Success = true
             };
         }

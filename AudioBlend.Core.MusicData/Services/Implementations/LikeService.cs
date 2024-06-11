@@ -3,6 +3,7 @@ using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Interfaces;
 using AudioBlend.Core.Shared.Responses;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AudioBlend.Core.MusicData.Services.Implementations
 {
@@ -15,9 +16,10 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         private readonly IAlbumRepository _albumRepository;
         private readonly IPlaylistRepository _playlistRepository;
         private readonly ISongRepository _songRepository;
+        private readonly IGenreRepository _genreRepository;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public LikeService(IAlbumRepository albumRepository, IPlaylistRepository playlistRepository, ISongRepository songRepository, ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository, ILikeSongRepository likeSongRepository, UserManager<IdentityUser> userManager)
+        public LikeService(IGenreRepository genreRepository,IAlbumRepository albumRepository, IPlaylistRepository playlistRepository, ISongRepository songRepository, ILikeAlbumRepository likeAlbumRepository, ILikePlaylistRepository likePlaylistRepository, ILikeSongRepository likeSongRepository, UserManager<IdentityUser> userManager)
         {
             _albumRepository = albumRepository;
             _playlistRepository = playlistRepository;
@@ -26,6 +28,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             _likePlaylistRepository = likePlaylistRepository;
             _likeSongRepository = likeSongRepository;
             _userManager = userManager;
+            _genreRepository = genreRepository;
         }
 
         public async Task<Response<LikePlaylist>> GetPlaylistLikeByUser(string userId, Guid playlistId)

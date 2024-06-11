@@ -7,13 +7,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AudioBlend.Core.MusicData.Migrations
 {
     /// <inheritdoc />
-    public partial class MusicDataSeed1 : Migration
+    public partial class initGenres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "music_data");
+
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:fuzzystrmatch", ",,");
 
             migrationBuilder.CreateTable(
                 name: "artists",
@@ -23,13 +26,26 @@ namespace AudioBlend.Core.MusicData.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     ImgUrl = table.Column<string>(type: "text", nullable: false),
-                    Genres = table.Column<List<string>>(type: "text[]", nullable: false),
-                    Popularity = table.Column<int>(type: "integer", nullable: false),
+                    GenresIds = table.Column<List<Guid>>(type: "uuid[]", nullable: false),
+                    Followers = table.Column<int>(type: "integer", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_artists", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "genres",
+                schema: "music_data",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_genres", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -40,7 +56,10 @@ namespace AudioBlend.Core.MusicData.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     IsPublic = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    CoverUrl = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Likes = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +76,7 @@ namespace AudioBlend.Core.MusicData.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     ReleaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
-                    CoverUrl = table.Column<string>(type: "text", nullable: false),
+                    CoverUrl = table.Column<string>(type: "text", nullable: true),
                     ArtistId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -65,6 +84,26 @@ namespace AudioBlend.Core.MusicData.Migrations
                     table.PrimaryKey("PK_albums", x => x.Id);
                     table.ForeignKey(
                         name: "FK_albums_artists_ArtistId",
+                        column: x => x.ArtistId,
+                        principalSchema: "music_data",
+                        principalTable: "artists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "follow_artists",
+                schema: "music_data",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ArtistId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_follow_artists", x => new { x.UserId, x.ArtistId });
+                    table.ForeignKey(
+                        name: "FK_follow_artists_artists_ArtistId",
                         column: x => x.ArtistId,
                         principalSchema: "music_data",
                         principalTable: "artists",
@@ -98,8 +137,7 @@ namespace AudioBlend.Core.MusicData.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
-                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false),
-                    LikedByUsers = table.Column<string[]>(type: "text[]", nullable: false)
+                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -121,9 +159,10 @@ namespace AudioBlend.Core.MusicData.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Duration = table.Column<int>(type: "integer", nullable: false),
-                    Genres = table.Column<List<string>>(type: "text[]", nullable: false),
+                    GenresIds = table.Column<List<Guid>>(type: "uuid[]", nullable: false),
                     ArtistId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false)
+                    AlbumId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AudioUrl = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -165,26 +204,26 @@ namespace AudioBlend.Core.MusicData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaylistSong",
+                name: "playlist_songs",
                 schema: "music_data",
                 columns: table => new
                 {
-                    PlaylistsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SongsId = table.Column<Guid>(type: "uuid", nullable: false)
+                    PlaylistId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SongId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaylistSong", x => new { x.PlaylistsId, x.SongsId });
+                    table.PrimaryKey("PK_playlist_songs", x => new { x.PlaylistId, x.SongId });
                     table.ForeignKey(
-                        name: "FK_PlaylistSong_playlists_PlaylistsId",
-                        column: x => x.PlaylistsId,
+                        name: "FK_playlist_songs_playlists_PlaylistId",
+                        column: x => x.PlaylistId,
                         principalSchema: "music_data",
                         principalTable: "playlists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlaylistSong_songs_SongsId",
-                        column: x => x.SongsId,
+                        name: "FK_playlist_songs_songs_SongId",
+                        column: x => x.SongId,
                         principalSchema: "music_data",
                         principalTable: "songs",
                         principalColumn: "Id",
@@ -195,6 +234,12 @@ namespace AudioBlend.Core.MusicData.Migrations
                 name: "IX_albums_ArtistId",
                 schema: "music_data",
                 table: "albums",
+                column: "ArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_follow_artists_ArtistId",
+                schema: "music_data",
+                table: "follow_artists",
                 column: "ArtistId");
 
             migrationBuilder.CreateIndex(
@@ -216,10 +261,10 @@ namespace AudioBlend.Core.MusicData.Migrations
                 column: "SongId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaylistSong_SongsId",
+                name: "IX_playlist_songs_SongId",
                 schema: "music_data",
-                table: "PlaylistSong",
-                column: "SongsId");
+                table: "playlist_songs",
+                column: "SongId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_songs_AlbumId",
@@ -238,6 +283,14 @@ namespace AudioBlend.Core.MusicData.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "follow_artists",
+                schema: "music_data");
+
+            migrationBuilder.DropTable(
+                name: "genres",
+                schema: "music_data");
+
+            migrationBuilder.DropTable(
                 name: "like_albums",
                 schema: "music_data");
 
@@ -250,7 +303,7 @@ namespace AudioBlend.Core.MusicData.Migrations
                 schema: "music_data");
 
             migrationBuilder.DropTable(
-                name: "PlaylistSong",
+                name: "playlist_songs",
                 schema: "music_data");
 
             migrationBuilder.DropTable(

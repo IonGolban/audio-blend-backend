@@ -1,7 +1,9 @@
-﻿namespace AudioBlend.Core.MusicData.Services.Interfaces
+﻿using AudioBlend.Core.MusicData.Models.Genres;
+
+namespace AudioBlend.Core.MusicData.Services.Interfaces
 {
     public interface IRecommendationService
     {
-        Task<List<string>> GetRecommendationGenres(string id, int count);
+        Task<List<Genre>> GetRecommendationGenres(string id, int count);
     }
 }

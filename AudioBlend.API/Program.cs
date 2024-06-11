@@ -141,6 +141,8 @@ builder.Services.AddScoped<ILikePlaylistRepository, LikePlaylistRepository>();
 builder.Services.AddScoped<ILikeSongRepository, LikeSongRepository>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+
 
 var app = builder.Build();
 

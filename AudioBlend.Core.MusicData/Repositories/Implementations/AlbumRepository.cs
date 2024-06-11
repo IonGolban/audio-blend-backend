@@ -1,5 +1,6 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Models.DTOs.Searches;
+using AudioBlend.Core.MusicData.Models.Genres;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Implementations;
 using AudioBlend.Core.Shared.Results;
@@ -7,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AudioBlend.Core.MusicData.Repositories.Implementations
 {
-    public class AlbumRepository(AudioBlendContext context, ISongRepository songRepository) : BaseRepository<Album>(context), IAlbumRepository
+    public class AlbumRepository(AudioBlendContext context, ISongRepository songRepository, IGenreRepository genreRepository) : BaseRepository<Album>(context), IAlbumRepository
     {
         private readonly AudioBlendContext _context = context;
         private readonly ISongRepository _songRepository = songRepository;
+        private IGenreRepository _genreRepository = genreRepository;
 
         public async override Task<Result<Album>> GetByIdAsync(Guid id)
         {
@@ -63,13 +65,13 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
             return Result<List<Album>>.Success(randomAlbums);
         }
 
-        public async Task<Result<List<Album>>> GetRecommendedByGenreFromArtists(string genre, int count)
+        public async Task<Result<List<Album>>> GetRecommendedByGenreFromArtists(Guid genre, int count)
         {
             var result = await _context.Albums
-                .Include (a => a.Songs)
-                .Include (a => a.LikedByUsers)
+                .Include(a => a.Songs)
+                .Include(a => a.LikedByUsers)
                 .Include(a => a.Artist)
-                .Where(a => a.Artist.Genres.Any( g => g.Equals(genre)))
+                .Where(a => a.Artist.GenresIds.Contains(genre))
                 .OrderBy(a => Guid.NewGuid())
                 .Take(count)
                 .ToListAsync();
@@ -77,10 +79,20 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
             return Result<List<Album>>.Success(result);
             
         }
-        public async Task<Result<List<Album>>> GetRecommendedByGenreFromSongs(string genre, int count)
+        public async Task<Result<List<Album>>> GetRecommendedByGenreFromSongs(Guid genre, int count)
         {
+            if(genre == null)
+            {
+                return Result<List<Album>>.Failure("Genre is empty");
+            }
 
-            var songs = await _songRepository.GetByGenre(genre, 10);
+            var genreEntity = await _genreRepository.GetByIdAsync(genre);
+            if (!genreEntity.IsSuccess)
+            {
+                return Result<List<Album>>.Failure("Genre not found");
+            }
+
+            var songs = await _songRepository.GetByGenre(genreEntity.Value.Id, 10);
             if (!songs.IsSuccess)
             {
                 songs = await _songRepository.GetRandom(10);

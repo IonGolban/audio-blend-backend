@@ -1,5 +1,6 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Songs;
 using AudioBlend.Core.MusicData.Models.DTOs.Searches;
+using AudioBlend.Core.MusicData.Models.Genres;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.Shared.Results;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,9 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
         }
         public async Task<Result<List<Song>>> GetByAlbumId(Guid albumId)
         {
-            var result = await _context.Songs.Where(s => s.AlbumId == albumId).ToListAsync();
+            var result = await _context.Songs
+                .Where(s => s.AlbumId == albumId)
+                .ToListAsync();
             if (result == null)
             {
                 return Result<List<Song>>.Failure("No songs found");
@@ -45,10 +48,12 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
             return Result<List<Song>>.Success(result);
         }
 
-        public async Task<Result<List<Song>>> GetByGenre(string genre, int count)
+        public async Task<Result<List<Song>>> GetByGenre(Guid genre, int count)
         {
+
+
             var songs = await _context.Songs
-                .Where(s => s.Genres.Contains(genre))
+                .Where(s => s.GenresIds.Contains(genre))
                 .OrderBy(s => Guid.NewGuid())
                 .Take(count)
                 .ToListAsync();

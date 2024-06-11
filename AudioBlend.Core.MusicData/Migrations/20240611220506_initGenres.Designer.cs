@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AudioBlend.Core.MusicData.Migrations
 {
     [DbContext(typeof(AudioBlendContext))]
-    [Migration("20240608142251_TestUserId")]
-    partial class TestUserId
+    [Migration("20240611220506_initGenres")]
+    partial class initGenres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,9 +71,9 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.Property<int>("Followers")
                         .HasColumnType("integer");
 
-                    b.Property<List<string>>("Genres")
+                    b.Property<List<Guid>>("GenresIds")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("uuid[]");
 
                     b.Property<string>("ImgUrl")
                         .IsRequired()
@@ -142,9 +142,9 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
-                    b.Property<List<string>>("Genres")
+                    b.Property<List<Guid>>("GenresIds")
                         .IsRequired()
-                        .HasColumnType("text[]");
+                        .HasColumnType("uuid[]");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -157,6 +157,21 @@ namespace AudioBlend.Core.MusicData.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("songs", "music_data");
+                });
+
+            modelBuilder.Entity("AudioBlend.Core.MusicData.Models.Genres.Genre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("genres", "music_data");
                 });
 
             modelBuilder.Entity("AudioBlend.Core.MusicData.Models.Likes.FollowArtist", b =>

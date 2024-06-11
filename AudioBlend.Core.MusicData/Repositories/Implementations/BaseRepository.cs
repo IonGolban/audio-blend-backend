@@ -1,7 +1,6 @@
 ﻿using AudioBlend.Core.Repositories.Interfaces;
 using AudioBlend.Core.Shared.Results;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 
 namespace AudioBlend.Core.MusicData.Repositories.Implementations
 {

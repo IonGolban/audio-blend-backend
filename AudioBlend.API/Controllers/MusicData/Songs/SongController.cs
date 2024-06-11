@@ -54,7 +54,7 @@ namespace AudioBlend.API.Controllers.MusicData.Songs
 
         [HttpGet("genre/{genre}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByGenre([FromRoute] string genre, [FromQuery] int count)
+        public async Task<IActionResult> GetByGenre([FromRoute] Guid genre, [FromQuery] int count)
         {
             var res = await _songService.GetByGenre(genre, count);
             if (!res.Success)
@@ -66,7 +66,7 @@ namespace AudioBlend.API.Controllers.MusicData.Songs
 
         [HttpGet("genres/{count}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByGenres([FromBody] List<string> genres, [FromRoute] int count)
+        public async Task<IActionResult> GetByGenres([FromBody] List<Guid> genres, [FromRoute] int count)
         {
             var res = await _songService.GetByGenres(genres, count);
             if (!res.Success)

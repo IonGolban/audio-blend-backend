@@ -13,5 +13,6 @@ namespace AudioBlend.Core.UserAccess.Services.Interfaces.Users
         Task<Response<UserDto>> UpdatePassword(UpdatePasswordDto updatePasswordDto);
         Task<Response<UserDto>> UpdateEmail(UpdateEmailDto updateEmailDto);
         Task<Response<UserDto>> UpdateImage(UpdateImgDto updateImg);
+        Task<Response<List<UserDto>>> SerachUsersByQuery(string query, int count);
     }
 }
