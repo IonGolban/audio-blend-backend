@@ -1,6 +1,4 @@
-﻿
-using AudioBlend.Core.MusicData.Domain.Songs;
-using AudioBlend.Core.MusicData.Models.Likes;
+﻿using AudioBlend.Core.MusicData.Models.Likes;
 using AudioBlend.Core.MusicData.Models.Playlists;
 
 namespace AudioBlend.Core.MusicData.Domain.Playlists

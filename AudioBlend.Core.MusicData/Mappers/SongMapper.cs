@@ -2,6 +2,7 @@
 using AudioBlend.Core.MusicData.Domain.Songs;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
 using AudioBlend.Core.MusicData.Models.Genres;
+using System.Transactions;
 
 namespace AudioBlend.Core.MusicData.Mappers
 {
@@ -9,7 +10,8 @@ namespace AudioBlend.Core.MusicData.Mappers
     {
         public static SongQueryDto MapToSongQueryDto(Song song, Artist artist, List<Genre> genres)
         {
-            return new SongQueryDto
+
+           return new SongQueryDto
             {
                 Id = song.Id,
                 Title = song.Title,
