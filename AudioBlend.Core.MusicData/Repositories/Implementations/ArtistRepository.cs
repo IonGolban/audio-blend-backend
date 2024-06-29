@@ -10,6 +10,22 @@ namespace AudioBlend.Core.MusicData.Repositories.Implementations
     {
         private readonly AudioBlendContext _context = context;
 
+        public async Task<Result<List<Artist>>> GetByGenres(List<Guid> genresIds, int count)
+        {
+            var artists = await _context.Artists
+                .Where(a => a.GenresIds.Intersect(genresIds).Any())
+                .OrderBy(a => Guid.NewGuid())
+                .Take(count)
+                .ToListAsync();
+
+            
+            if (artists == null)
+             {
+                return Result<List<Artist>>.Failure("No artists found");
+            }
+            return Result<List<Artist>>.Success(artists);
+        }
+
         public async Task<Result<Artist>> getByUserId(string userId)
         {
             var result = await _context.Artists

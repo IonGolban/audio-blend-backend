@@ -1,6 +1,11 @@
-﻿using AudioBlend.Core.MusicData.Services.Interfaces;
+﻿using AudioBlend.Core.MusicData.Models.DTOs;
+using AudioBlend.Core.MusicData.Models.DTOs.Albums;
+using AudioBlend.Core.MusicData.Models.DTOs.Songs;
+using AudioBlend.Core.MusicData.Services.Interfaces;
+using AudioBlend.Core.UserAccess.Services.Interfaces.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
 
 namespace AudioBlend.API.Controllers.MusicData.Albums
 {
@@ -10,11 +15,14 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
     {
         private readonly IAlbumService _albumService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAlbumCommandService _albumCommandService;
+        private readonly IUserService userService;
         
-        public AlbumController(IAlbumService albumService, ICurrentUserService currentUserService)
+        public AlbumController(IAlbumCommandService albumCommandService , IAlbumService albumService, ICurrentUserService currentUserService)
         {
             _albumService = albumService;
             _currentUserService = currentUserService;
+            _albumCommandService = albumCommandService;
         }
 
         [HttpGet]
@@ -108,9 +116,9 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
             return Ok(res.Data);
         }
 
-        [HttpGet("genres/{count}")]
+        [HttpPost("genres")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByGenres([FromQuery] List<Guid> genres, int count)
+        public async Task<IActionResult> GetByGenres([FromBody] GenresQueryDto genres,[FromQuery] int count)
         {
             var res = await _albumService.GetByGenres(genres, count);
             if (!res.Success)
@@ -131,5 +139,47 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
             }
             return Ok(res.Data);
         }
+
+        [Authorize]
+        [HttpPost("add-album")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<IActionResult> AddAlbum([FromForm] AddAlbumDto albumDto)
+        {
+            var res = await _albumCommandService.AddAlbum(albumDto);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return CreatedAtAction(nameof(GetAlbum), new { id = res.Data.Id }, res.Data);
+        }
+
+        [Authorize]
+        [HttpPost("add-single")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> AddSingleRelease([FromForm] AddSingleReleaseDto singleReleaseDto)
+        {
+            var res = await _albumCommandService.AddSingleRelease(singleReleaseDto);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteAlbum([FromRoute] Guid id)
+        {
+            var res = await _albumCommandService.DeleteAlbum(id);
+
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+
+            return Ok(res.Data);
+        }
+
     }
 }

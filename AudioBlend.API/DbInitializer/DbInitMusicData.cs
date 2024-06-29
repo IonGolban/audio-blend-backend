@@ -8,10 +8,6 @@ using AudioBlend.API.DbInitializer.Models;
 using AudioBlend.Core.MusicData;
 using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Domain.Artists;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AudioBlend.Core.UserAccess.Models.Roles;
 using AudioBlend.Core.UserAccess;
 using AudioBlend.Core.MusicData.Models.Genres;
@@ -20,8 +16,7 @@ namespace AudioBlend.API.DbInitializer
 {
     public static class DbInitMusicData
     {
-        private const string PATH_DATA = "C:\\Users\\uig26544\\Desktop\\Copyright-Free-Music\\info\\songs_info1.json";
-        private const string PATH_IMAGES = "C:\\Users\\uig26544\\Desktop\\Copyright-Free-Music";
+        private const string PATH_DATA = ".\\Models\\Copyright-Free-Music\\info\\songs_info1.json";
         private const string UNKNOWN_USER_IMG = "https://golbanionstorage.blob.core.windows.net/default/unknown_user.jpg";
 
         private static List<Artist> usedArtists = new List<Artist>();
@@ -245,7 +240,7 @@ namespace AudioBlend.API.DbInitializer
 
             foreach (var playlist in playlistsDb)
             {
-                var numberOfSongs = rnd.Next(5, 20); // Each playlist will have between 5 and 20 songs
+                var numberOfSongs = rnd.Next(5, 20); 
                 for (int i = 0; i < numberOfSongs; i++)
                 {
                     var song = songs_db[rnd.Next(0, songs_db.Count)];

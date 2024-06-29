@@ -48,5 +48,10 @@ namespace AudioBlend.Core.MusicData.Domain.Albums
             Songs.Remove(song);
         }
 
+        public void AddSongRange(List<Song> songs)
+        {
+            Songs.AddRange(songs);
+        }
+        
     }
 }

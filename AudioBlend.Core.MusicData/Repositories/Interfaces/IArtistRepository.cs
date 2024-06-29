@@ -7,6 +7,7 @@ namespace AudioBlend.Core.MusicData.Repositories.Interfaces
 {
     public interface IArtistRepository : IAsyncRepository<Artist>
     {
+        Task<Result<List<Artist>>> GetByGenres(List<Guid> genresIds, int count);
         Task<Result<Artist>> getByUserId(string userId);
         Task<Result<List<SearchRepoResult<Artist>>>> SearchByArtistName(string name, int treshold, int count);
     }

@@ -1,5 +1,6 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Albums;
 using AudioBlend.Core.MusicData.Mappers;
+using AudioBlend.Core.MusicData.Models.DTOs;
 using AudioBlend.Core.MusicData.Models.DTOs.Albums;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
@@ -295,9 +296,9 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        public async Task<Response<List<AlbumQueryDto>>> GetByGenres(List<Guid> genres, int count)
+        public async Task<Response<List<AlbumQueryDto>>> GetByGenres(GenresQueryDto genres, int count)
         {
-            if (genres.Count <= 0 || count <= 0)
+            if (genres.GenresIds.Count <= 0 || count <= 0)
             {
                 return new Response<List<AlbumQueryDto>>()
                 {
@@ -308,7 +309,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
             var albums = new List<Album>();
 
-            foreach (var genre in genres)
+            foreach (var genre in genres.GenresIds)
             {
                 var genreEntity = await _genreRepository.GetByIdAsync(genre);
 

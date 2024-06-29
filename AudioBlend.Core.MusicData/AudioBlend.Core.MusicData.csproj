@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AudioBlend.Core.Shared\AudioBlend.Core.Shared.csproj" />
-    <ProjectReference Include="..\AudioBlend.Core.Streaming\AudioBlend.Core.Streaming.csproj" />
   </ItemGroup>
 
 </Project>

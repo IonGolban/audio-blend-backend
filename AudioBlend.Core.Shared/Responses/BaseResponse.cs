@@ -10,7 +10,7 @@
         }
         public bool Success { get; set; }
         public string Message { get; set; } = default!;
-        public List<String>? ValidationErrors { get; set;}
+        public List<string>? ValidationErrors { get; set;}
 
     }
 }

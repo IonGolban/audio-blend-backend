@@ -1,6 +1,7 @@
 ﻿using AudioBlend.Core.MusicData.Domain.Artists;
 using AudioBlend.Core.MusicData.Domain.Songs;
 using AudioBlend.Core.MusicData.Mappers;
+using AudioBlend.Core.MusicData.Models.DTOs;
 using AudioBlend.Core.MusicData.Models.DTOs.Songs;
 using AudioBlend.Core.MusicData.Repositories.Interfaces;
 using AudioBlend.Core.MusicData.Services.Interfaces;
@@ -281,10 +282,20 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
         }
 
-        public async Task<Response<List<SongQueryDto>>> GetByGenres(List<Guid> genres, int count)
+        public async Task<Response<List<SongQueryDto>>> GetByGenres(GenresQueryDto genresQuery, int count)
         {
             var songs = new List<Song>();
-            foreach (var genre in genres)
+
+            if(genresQuery.GenresIds.Count <= 0 || genresQuery.GenresIds.Count == 0)
+            {
+                return new Response<List<SongQueryDto>>()
+                {
+                    Success = false,
+                    Message = "No genres found"
+                };
+            }
+
+            foreach (var genre in genresQuery.GenresIds)
             {
                 var genreEntity = await _genreRepository.GetByIdAsync(genre);
 
@@ -294,6 +305,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 }
 
                 var result = await _songRepository.GetByGenre(genreEntity.Value.Id, count);
+
                 if (result.IsSuccess)
                 {
                     songs.AddRange(result.Value);
@@ -330,6 +342,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 Data = listSongsDto
             };
         }
+
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using AudioBlend.Core.MusicData.Services.Interfaces;
+﻿using AudioBlend.Core.MusicData.Models.DTOs;
+using AudioBlend.Core.MusicData.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,9 +65,9 @@ namespace AudioBlend.API.Controllers.MusicData.Songs
             return Ok(res.Data);
         }
 
-        [HttpGet("genres/{count}")]
+        [HttpPost("genres")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByGenres([FromBody] List<Guid> genres, [FromRoute] int count)
+        public async Task<IActionResult> GetByGenres([FromBody] GenresQueryDto genres, [FromQuery] int count)
         {
             var res = await _songService.GetByGenres(genres, count);
             if (!res.Success)

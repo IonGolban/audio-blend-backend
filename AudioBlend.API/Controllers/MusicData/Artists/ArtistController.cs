@@ -1,4 +1,7 @@
-﻿using AudioBlend.Core.MusicData.Services.Interfaces;
+﻿using AudioBlend.Core.MusicData.Models.DTOs;
+using AudioBlend.Core.MusicData.Models.DTOs.Users;
+using AudioBlend.Core.MusicData.Services.Interfaces;
+using AudioBlend.Core.UserAccess.Migrations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,5 +72,75 @@ namespace AudioBlend.API.Controllers.MusicData.Artists
             return Ok(res.Data);
         }
 
+        [Authorize]
+        [HttpGet("genres")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByGenres([FromBody] GenresQueryDto genres, [FromQuery] int count)
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _artistService.GetByGenres(genres, count);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+            
+        }
+        [Authorize]
+        [HttpGet("user")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByUserId()
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _artistService.IsUserArtist(userId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+        [Authorize]
+        [HttpPut("update/image")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateImage([FromForm] UpdateImgDto updateImageDto)
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _artistService.UpdateImage(updateImageDto);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
+        [Authorize]
+        [HttpPut("update/name")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateName([FromBody] UpdateUsernameDto updateNameDto)
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _artistService.UpdateName(updateNameDto.Username);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
     }
 }

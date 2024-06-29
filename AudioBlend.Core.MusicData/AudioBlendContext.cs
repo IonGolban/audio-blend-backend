@@ -11,7 +11,8 @@ namespace AudioBlend.Core.MusicData
 {
     public class AudioBlendContext : DbContext
     {
-        public AudioBlendContext(DbContextOptions<AudioBlendContext> dbContextOptions) : base(dbContextOptions) { }
+        public AudioBlendContext(DbContextOptions<AudioBlendContext> dbContextOptions)
+            : base(dbContextOptions) { }
 
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }

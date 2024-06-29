@@ -22,7 +22,14 @@ namespace AudioBlend.Core.MusicData.Domain.Artists
             Id = id;
             Name = name;
         }
-        public Artist(Guid id, string name, string imgUrl, List<Guid> artistGenres)
+        public Artist(Guid id, string name, string userId)
+        {
+            Id = id;
+            Name = name;
+            UserId = userId;
+        }
+
+            public Artist(Guid id, string name, string imgUrl, List<Guid> artistGenres)
         {
             Name = name;
             ImgUrl = imgUrl;
@@ -36,6 +43,29 @@ namespace AudioBlend.Core.MusicData.Domain.Artists
             GenresIds = artistGenres;
             Id = id;
             Followers = followers;
+        }
+
+        public void setImage(string imgUrl)
+        {
+            ImgUrl = imgUrl;
+        }
+        public void setGenres(List<Guid> genres)
+        {
+            GenresIds = genres;
+        }
+
+        public void setFollowers(int followers)
+        {
+            Followers = followers;
+        }
+        public void setUserId(string userId)
+        {
+            UserId = userId;
+        }
+
+        public void setName(string name)
+        {
+            Name = name;
         }
     }
 }
