@@ -10,5 +10,6 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
         Task<Response<FollowArtist>> UnfollowArtist(string userId, Guid artistId);
         Task<Response<List<FollowArtist>>> GetFollowArtistByUser(string userId);
         Task<Response<List<FollowArtist>>> GetFollowersArtistByArtist(Guid artistId);
+        
     }
 }

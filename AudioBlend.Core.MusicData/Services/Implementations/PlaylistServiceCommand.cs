@@ -68,6 +68,37 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             
         }
 
+        public async Task<Response<Playlist>> DeletePlaylist(Guid id)
+        {
+            var checkPlaylist = await _playlistRepository.GetByIdAsync(id);
+            if (checkPlaylist == null)
+            {
+                return new Response<Playlist>()
+                {
+                    Success = false,
+                    Message = "Playlist not found"
+                };
+            }
+
+            var result = await _playlistRepository.DeleteAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                return new Response<Playlist>()
+                {
+                    Success = false,
+                    Message = result.ErrorMsg
+                };
+            }
+
+            return new Response<Playlist>()
+            {
+                Data = result.Value,
+                Success = true
+            };
+
+        }
+
         public async Task<Response<Playlist>> UpdatePlaylist(UpdatePlaylistDto playlist)
         {
             if (playlist.Id == Guid.Empty || string.IsNullOrEmpty(playlist.Name) || string.IsNullOrEmpty(playlist.Description))

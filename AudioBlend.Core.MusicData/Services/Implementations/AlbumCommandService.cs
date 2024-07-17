@@ -99,15 +99,6 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             foreach (var songAlbum in albumDto.Songs)
             {
 
-                if (songAlbum.ContentType != "audio/mp3" && songAlbum.ContentType != "audio/wav" && songAlbum.ContentType != "audio/wave")
-                {
-                    return new Response<Album>()
-                    {
-                        Success = false,
-                        Message = "Song must be in mp3 format"
-                    };
-                }
-
                 var uploadedSongUrl = await _fileService.UploadFileToBlobAsync(songAlbum);
                 if (!uploadedSongUrl.IsSuccess)
                 {
@@ -277,7 +268,7 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         public async Task<Response<Album>> DeleteAlbum(Guid albumId)
         {
             var album = await _albumRepository.GetByIdAsync(albumId);
-            if (album == null)
+            if (!album.IsSuccess)
             {
                 return new Response<Album>()
                 {

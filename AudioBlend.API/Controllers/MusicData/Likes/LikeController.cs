@@ -191,5 +191,23 @@ namespace AudioBlend.API.Controllers.MusicData.Likes
             return Ok(res.Data);
         }
 
+        [Authorize]
+        [HttpGet("song/check/{songId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> CheckSongLikeByUser([FromRoute] Guid songId)
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _likeService.GetSongLikeByUser(userId, songId);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
     }
 }

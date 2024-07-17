@@ -16,6 +16,6 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
 
         Task<Response<List<AlbumQueryDto>>> GetByGenre(Guid genre, int count);
         Task<Response<List<AlbumQueryDto>>> GetByGenres(GenresQueryDto genres, int count);
-
+        Task<Response<string>> IsUserAlbum(string userId, Guid id);
     }
 }

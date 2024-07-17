@@ -16,6 +16,7 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
         Task<Response<List<LikeSong>>> GetLikeSongsByPlaylist(string userId, Guid id);
         Task<Response<LikeAlbum>> GetAlbumLikeByUser(string userId, Guid albumId);
         Task<Response<LikePlaylist>> GetPlaylistLikeByUser(string userId, Guid playlistId);
+        Task<Response<LikeSong>> GetSongLikeByUser(string userId, Guid songId);
         //Task<Response<string>> GetCountLikesPlaylist(Guid playlistId);
         //Task<Response<string>> GetCountLikesAlbum(Guid albumId);
         //Task<Response<string>> GetCountLikesSong(Guid songId);

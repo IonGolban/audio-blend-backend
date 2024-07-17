@@ -473,8 +473,41 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             };
 
         }
+        public async Task<Response<LikeSong>> GetSongLikeByUser(string userId, Guid songId)
+        {
+            var validatePostInputs = await ValidatePostInputs(userId, songId);
+            if (validatePostInputs != null)
+            {
+                return new Response<LikeSong>
+                {
+                    Success = false,
+                    Message = validatePostInputs
+                };
+            }
 
-
+            var song = await _songRepository.GetByIdAsync(songId);
+            if (!song.IsSuccess) {
+                return new Response<LikeSong>
+                {
+                    Success = false,
+                    Message = song.ErrorMsg
+                };
+            }
+            var likeSong = await _likeSongRepository.GetLikeSong(userId, songId);
+            if (!likeSong.IsSuccess)
+            {
+                return new Response<LikeSong>
+                {
+                    Success = true,
+                    Message = likeSong.ErrorMsg
+                };
+            }
+            return new Response<LikeSong>()
+            {
+                Success = true,
+                Data = likeSong.Value
+            };
+        }
 
         private async Task<string?> ValidatePostInputs(string userId, Guid id)
         {
@@ -489,7 +522,6 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             }
             return null;
         }
-
 
     }
 }

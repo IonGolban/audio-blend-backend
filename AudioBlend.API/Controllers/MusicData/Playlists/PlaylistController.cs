@@ -45,6 +45,18 @@ namespace AudioBlend.API.Controllers.MusicData.Playlists
             return Ok(response.Data);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePlaylist([FromRoute] Guid id)
+        {
+            var response = await _playlistServiceCommand.DeletePlaylist(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(response.Data);
+        }
+
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetPlaylistsByUserId([FromRoute] string userId)
         {

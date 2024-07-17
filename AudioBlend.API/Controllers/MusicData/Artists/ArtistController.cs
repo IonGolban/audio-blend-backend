@@ -73,7 +73,7 @@ namespace AudioBlend.API.Controllers.MusicData.Artists
         }
 
         [Authorize]
-        [HttpGet("genres")]
+        [HttpPost("genres")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByGenres([FromBody] GenresQueryDto genres, [FromQuery] int count)
         {
@@ -142,5 +142,18 @@ namespace AudioBlend.API.Controllers.MusicData.Artists
             }
             return Ok(res.Data);
         }
+        [Authorize]
+        [HttpGet("followed/user")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetFollowedArtistsByUser()
+        {
+            var res = await _artistService.GetFollowedArtistsByCurrentUser();
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
+
     }
 }

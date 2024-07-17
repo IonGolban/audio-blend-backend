@@ -67,5 +67,17 @@ namespace AudioBlend.Core.MusicData.Domain.Artists
         {
             Name = name;
         }
+
+        public void incrementFollowers()
+        {
+            Followers++;
+        }
+
+        public void decrementFollowers()
+        {
+            Followers--;
+        }
+
+
     }
 }

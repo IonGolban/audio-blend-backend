@@ -15,5 +15,6 @@ namespace AudioBlend.Core.MusicData.Services.Interfaces
         Task<Response<List<Artist>>> GetByGenres(GenresQueryDto genres, int count);
         Task<Response<Artist>> UpdateImage(UpdateImgDto updateImgDto);
         Task<Response<Artist>> UpdateName(string name);
+        Task<Response<List<Artist>>> GetFollowedArtistsByCurrentUser();
     }
 }

@@ -181,5 +181,22 @@ namespace AudioBlend.API.Controllers.MusicData.Albums
             return Ok(res.Data);
         }
 
+        [Authorize]
+        [HttpGet("{id}/isUserAlbum")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> IsUserAlbum([FromRoute] Guid id)
+        {
+            var userId = _currentUserService.GetUserId;
+            if (userId == null)
+            {
+                return BadRequest("User not found");
+            }
+            var res = await _albumService.IsUserAlbum(userId, id);
+            if (!res.Success)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Data);
+        }
     }
 }

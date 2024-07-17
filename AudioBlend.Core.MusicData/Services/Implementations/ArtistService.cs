@@ -18,13 +18,15 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ICurrentUserService _currentUserService;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
-        public ArtistService(IAzureBlobStorageService azureBlobStorageService ,ICurrentUserService currentUserService, UserManager<IdentityUser> userManager ,IArtistRepository artistRepository, IGenreRepository genreRepository)
+        private readonly IFollowService _followService;
+        public ArtistService(IFollowService followService ,IFollowArtistRepository followArtistRepository ,IAzureBlobStorageService azureBlobStorageService ,ICurrentUserService currentUserService, UserManager<IdentityUser> userManager ,IArtistRepository artistRepository, IGenreRepository genreRepository)
         {
             _artistRepository = artistRepository;
             _genreRepository = genreRepository;
             _userManager = userManager;
             _currentUserService = currentUserService;
             _azureBlobStorageService = azureBlobStorageService;
+            _followService = followService;
         }
 
         public async Task<Response<List<ArtistQueryDto>>> GetAll()
@@ -238,6 +240,49 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                 Data = result.Value,
                 Success = true
             };
+        }
+
+        public async Task<Response<List<Artist>>> GetFollowedArtistsByCurrentUser()
+        {
+            var userId = _currentUserService.GetUserId;
+            if(string.IsNullOrEmpty(userId))
+            {
+                return new Response<List<Artist>>()
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+            var followArtists = await _followService.GetFollowArtistByUser(userId);
+            if (!followArtists.Success)
+            {
+                return new Response<List<Artist>>()
+                {
+                    Success = false,
+                    Message = "Error while getting followed artists"
+                };
+            }
+            var artists = new List<Artist>();
+            foreach (var followArtist in followArtists.Data)
+            {
+                var artist = await _artistRepository.GetByIdAsync(followArtist.ArtistId);
+                if (!artist.IsSuccess)
+                {
+                    return new Response<List<Artist>>()
+                    {
+                        Success = false,
+                        Message = "Error while getting artist"
+                    };
+                }
+                artists.Add(artist.Value);
+            }
+
+            return new Response<List<Artist>>()
+            {
+                Data = artists,
+                Success = true
+            };
+
         }
     }
 }

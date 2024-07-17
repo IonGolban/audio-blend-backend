@@ -84,7 +84,9 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     AlbumName = song.Album.Title,
                     ArtistId = song.ArtistId,
                     ArtistName = album.Value.Artist.Name,
-                    CoverUrl = album.Value.CoverUrl
+                    CoverUrl = album.Value.CoverUrl,
+                    AudioUrl = song.AudioUrl
+                    
                 });
 
             }
@@ -385,6 +387,35 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
             return new Response<List<AlbumQueryDto>>()
             {
                 Data = albumQuery,
+                Success = true
+            };
+        }
+
+        public async Task<Response<string>> IsUserAlbum(string userId, Guid id)
+        {
+            var album = await _albumRepository.GetByIdAsync(id);
+            
+            if (!album.IsSuccess)
+            {
+                return new Response<string>()
+                {
+                    Success = false,
+                    Message = album.ErrorMsg
+                };
+            }
+
+            if(album.Value.Artist.UserId != userId)
+            {
+                return new Response<string>()
+                {
+                    Success = true,
+                    Message = "This album is not yours",
+                    Data = "false"
+                };
+            }
+            return new Response<string>() {
+
+                Data = "true",
                 Success = true
             };
         }

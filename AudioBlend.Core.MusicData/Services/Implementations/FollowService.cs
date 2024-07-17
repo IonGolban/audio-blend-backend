@@ -52,7 +52,8 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = "Already following artist"
                 };
             }
-
+            artist.Value.incrementFollowers();
+            await _artistRepository.UpdateAsync(artist.Value);
             var result = await _followArtistRepository.FollowArtist(followArtist);
             
             if (!result.IsSuccess)
@@ -132,8 +133,8 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
 
         public async Task<Response<FollowArtist>> UnfollowArtist(string userId, Guid artistId)
         {
-            var artist = _artistRepository.GetByIdAsync(artistId);
-            if (!artist.Result.IsSuccess)
+            var artist = await _artistRepository.GetByIdAsync(artistId);
+            if (!artist.IsSuccess)
             {
                 return new Response<FollowArtist>()
                 {
@@ -141,19 +142,22 @@ namespace AudioBlend.Core.MusicData.Services.Implementations
                     Message = "Artist not found"
                 };
             }
-            var result = _followArtistRepository.UnfollowArtist(userId, artistId);
-            if (!result.Result.IsSuccess)
+            var result = await _followArtistRepository.UnfollowArtist(userId, artistId);
+            if (!result.IsSuccess)
             {
                 return new Response<FollowArtist>()
                 {
                     Success = false,
-                    Message = result.Result.ErrorMsg
+                    Message = result.ErrorMsg
                 };
             }
+
+            artist.Value.decrementFollowers();
+            await _artistRepository.UpdateAsync(artist.Value);
             return new Response<FollowArtist>()
             {
                 Success = true,
-                Data = result.Result.Value
+                Data = result.Value
             };
 
         }
